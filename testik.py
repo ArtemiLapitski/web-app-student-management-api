@@ -1,7 +1,3 @@
-from app.database import connect_db
-from app import courses, COURSES, add_courses
+inp = '10.1'
 
-
-session = connect_db()
-
-add_courses(session, COURSES, courses)
+print(inp.isnumeric())
