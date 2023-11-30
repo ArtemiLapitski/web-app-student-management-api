@@ -1,5 +1,5 @@
-from sqlalchemy import MetaData
-from app import engine
+# from sqlalchemy import MetaData
+# from app import engine
 
 
 
@@ -11,13 +11,13 @@ from app import engine
 #         session.execute(query)
 #         session.commit()
 
-metadata_obj = MetaData()
-metadata_obj.reflect(bind=engine)
-
-courses = metadata_obj.tables["courses"]
-students = metadata_obj.tables["students"]
-student_groups = metadata_obj.tables["student_groups"]
-courses_students = metadata_obj.tables["courses_students"]
+# metadata_obj = MetaData()
+# metadata_obj.reflect(bind=engine)
+#
+# courses = metadata_obj.tables["courses"]
+# students = metadata_obj.tables["students"]
+# student_groups = metadata_obj.tables["student_groups"]
+# courses_students = metadata_obj.tables["courses_students"]
 
 
 

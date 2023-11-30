@@ -1,4 +1,4 @@
-from app import (NAMES, SURNAMES, GROUP_SIZES, COURSES_AMOUNT_PER_STUDENT, COURSES, LOWER_BOUND_STUDENTS_PER_GROUP,
+from app import (NAMES, SURNAMES, COURSES, LOWER_BOUND_STUDENTS_PER_GROUP,
                  UPPER_BOUND_STUDENTS_PER_GROUP, LOWER_BOUND_COURSES_PER_STUDENT, UPPER_BOUND_COURSES_PER_STUDENT)
 import random
 import string
@@ -78,10 +78,11 @@ def get_courses_and_group_by_students(courses_by_students: dict, students_by_gro
 
 
 
-
-# students = generate_students()
 #
-# students_by_groups = assign_students_to_groups(students)
+# students = generate_students()
+# groups = generate_groups()
+#
+# students_by_groups = assign_students_to_groups(students, groups)
 #
 # courses_by_students = assign_courses_to_students(students)
 #
@@ -89,6 +90,9 @@ def get_courses_and_group_by_students(courses_by_students: dict, students_by_gro
 # courses_and_group_by_students = get_courses_and_group_by_students(courses_by_students, students_by_groups)
 #
 # print(courses_and_group_by_students)
+
+
+
 #
 # groups = []
 # for student, data in courses_and_group_by_students.items():

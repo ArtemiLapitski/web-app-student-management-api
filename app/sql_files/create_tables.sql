@@ -1,10 +1,3 @@
-drop table course_student;
-drop table student_group CASCADE;
-drop table student CASCADE;
-drop table course;
-
-
-
 CREATE TABLE student_group (
 	group_id serial PRIMARY KEY,
 	group_name char(5) UNIQUE NOT NULL
@@ -27,11 +20,6 @@ CREATE TABLE course (
 
 CREATE TABLE course_student (
 	course_id INTEGER REFERENCES course(course_id),
-	student_id INTEGER REFERENCES student(student_id),
+	student_id INTEGER REFERENCES student(student_id) ON DELETE CASCADE,
 	PRIMARY KEY(course_id,student_id)
 );
-
-
-
-
-
