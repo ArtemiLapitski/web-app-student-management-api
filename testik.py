@@ -102,3 +102,6 @@ def delete_student_from_course(student_id: int, course_id: int):
         session.commit()
 
 # delete_student_from_course(student_id=208, course_id=6)
+
+
+print(type(session))

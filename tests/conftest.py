@@ -1,21 +1,21 @@
-from main import create_app, create_api
-from app import add_urls, USER_PASSWORD, USER_USERNAME
-import pytest
-from sqlalchemy import URL, create_engine, text
-from sqlalchemy.orm import sessionmaker
-
-
-@pytest.fixture()
-def app():
-    app = create_app()
-    return app
-
-
-@pytest.fixture()
-def client(app):
-    api = create_api(app)
-    add_urls(api)
-    return app.test_client()
+# from main import create_app, create_api
+# from app import add_urls, USER_PASSWORD, USER_USERNAME
+# import pytest
+# from sqlalchemy import URL, create_engine, text
+# from sqlalchemy.orm import sessionmaker
+#
+#
+# @pytest.fixture()
+# def app():
+#     app = create_app()
+#     return app
+#
+#
+# @pytest.fixture()
+# def client(app):
+#     api = create_api(app)
+#     add_urls(api)
+#     return app.test_client()
 
 
 # @pytest.fixture(scope="module")
