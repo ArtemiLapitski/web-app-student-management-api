@@ -1,4 +1,5 @@
-from sqlalchemy import URL, text, insert, select, create_engine, Table
+from sqlalchemy import URL, text, insert, select, create_engine, Table, MetaData
+from sqlalchemy.orm import sessionmaker
 
 
 # ADD TO SESSION and create db outbupt annotations
@@ -48,13 +49,44 @@ def create_db(superuser_username: str,
         database=db_name
     )
     engine = create_engine(user_db_url)
+    # connection = engine.connect()
+    # with engine.connect() as conn:
+    #     with open("create_tables.sql") as file:
+    #         query = text(file.read())
+    #         conn.execute(query)
+    #         conn.commit()
+
+    return engine
+
+
+def create_tables(engine, sql_file_path: str):
+
     with engine.connect() as conn:
-        with open("create_tables.sql") as file:
+        with open(sql_file_path) as file:
             query = text(file.read())
             conn.execute(query)
             conn.commit()
 
-    return engine
+    metadata_obj = MetaData()
+    metadata_obj.reflect(bind=engine)
+
+    course_table = metadata_obj.tables["course"]
+    student_table = metadata_obj.tables["student"]
+    student_group_table = metadata_obj.tables["student_group"]
+    course_student_table = metadata_obj.tables["course_student"]
+
+    # return {'course_table': course_table,
+    #         'student_table': student_table,
+    #         'student_group_table': student_group_table,
+    #         'course_student_table': course_student_table}
+    return course_table, student_group_table, student_table, course_student_table
+
+
+def get_session(engine):
+    Session = sessionmaker(engine)
+    session = Session()
+
+    return session
 
 
 def add_courses(courses_list: list, course_table: Table, session):
