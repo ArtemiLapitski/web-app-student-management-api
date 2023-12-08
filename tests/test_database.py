@@ -1,8 +1,6 @@
-from sqlalchemy import URL, create_engine, text
-from docker.database import create_db, create_tables, get_session
-from .database import (add_students, add_groups, add_courses)
-from .generate_test_data import (assign_students_to_groups, assign_courses_to_students, generate_students,
-                                 get_courses_and_group_by_students, generate_groups, COURSES)
+from sqlalchemy import select
+from docker.database import get_session
+from docker.generate_test_data import COURSES
 
 SUPERUSER_USERNAME='postgres'
 SUPERUSER_PASSWORD='1996'
@@ -14,55 +12,32 @@ PORT=5432
 HOST='localhost'
 
 
-def test_db():
-    engine = create_db(SUPERUSER_USERNAME,
-                       SUPERUSER_PASSWORD,
-                       USERNAME,
-                       PASSWORD,
-                       DB_NAME,
-                       ROLE,
-                       PORT,
-                       HOST)
-
-    course_table, student_group_table, student_table, course_student_table = (
-        create_tables(engine, 'app/sql_files/create_tables.sql'))
+def test_courses(setup_db, create_test_tables, add_test_data):
+    engine = setup_db
+    course_table, student_group_table, student_table, course_student_table = create_test_tables
+    generated_students = add_test_data['students']
+    generated_groups = add_test_data['groups']
+    students_by_groups = add_test_data['students_by_groups']
+    courses_by_students = add_test_data['courses_by_students']
+    courses_and_group_by_students = add_test_data['courses_and_group_by_students']
 
     session = get_session(engine)
 
-    students_list = generate_students()
-    groups_list = generate_groups()
+    with session:
+        courses = session.execute(select(course_table.c.course_name)).all()
+        groups = session.execute(select(student_group_table.c.group_name)).all()
+        students = session.execute(select(student_table.c.first_name, student_table.c.last_name)).all()
+        # students_by_groups = session.execute(select(student_table.c.first_name, student_table.c.last_name)).all()
 
-    students_by_groups = assign_students_to_groups(students_list, groups_list)
-    courses_by_students = assign_courses_to_students(students_list)
-    data_for_students = get_courses_and_group_by_students(courses_by_students, students_by_groups)
+    courses = [course_name[0] for course_name in courses]
+    groups = [group_name[0] for group_name in groups]
+    students = [(student[0], student[1]) for student in students]
+    generated_students_without_enum = [(student[1], student[2]) for student in generated_students]
+    # print(generated_students_without_enum)
 
-    add_groups(groups_list, student_group_table, session)
-    add_courses(COURSES, course_table, session)
-    add_students(data_for_students, student_group_table, student_table, course_table, course_student_table, session)
-
-    superuser_url = URL.create(
-        "postgresql",
-        username=SUPERUSER_USERNAME,
-        password=SUPERUSER_PASSWORD,
-        host=HOST,
-        port=PORT
-    )
-    engine = create_engine(superuser_url)
-    with engine.connect() as conn:
-        conn.execution_options(isolation_level="AUTOCOMMIT")
-        conn.execute(text(f"DROP DATABASE {DB_NAME} WITH (FORCE)"))
-        conn.execute(text(f"DROP USER {USERNAME}"))
-        conn.execute(text(f"DROP ROLE {ROLE}"))
-
-
-    #
-    # with session:
-    #     all_courses = session.execute(select(course_table.c.course_name)).all()
-    #
-    # all_courses = [course_name[0] for course_name in all_courses]
-    #
-    # assert all_courses == COURSES
-
+    assert courses == COURSES
+    assert groups == generated_groups
+    assert students == generated_students_without_enum
 
 
 

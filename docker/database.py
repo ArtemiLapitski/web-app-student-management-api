@@ -1,5 +1,7 @@
 from sqlalchemy import URL, text, insert, select, create_engine, Table, MetaData
 from sqlalchemy.orm import sessionmaker
+from .generate_test_data import (assign_students_to_groups, assign_courses_to_students, generate_students,
+                                get_courses_and_group_by_students, generate_groups, COURSES)
 
 
 # ADD TO SESSION and create db outbupt annotations
@@ -49,12 +51,6 @@ def create_db(superuser_username: str,
         database=db_name
     )
     engine = create_engine(user_db_url)
-    # connection = engine.connect()
-    # with engine.connect() as conn:
-    #     with open("create_tables.sql") as file:
-    #         query = text(file.read())
-    #         conn.execute(query)
-    #         conn.commit()
 
     return engine
 
@@ -75,10 +71,6 @@ def create_tables(engine, sql_file_path: str):
     student_group_table = metadata_obj.tables["student_group"]
     course_student_table = metadata_obj.tables["course_student"]
 
-    # return {'course_table': course_table,
-    #         'student_table': student_table,
-    #         'student_group_table': student_group_table,
-    #         'course_student_table': course_student_table}
     return course_table, student_group_table, student_table, course_student_table
 
 
@@ -125,3 +117,28 @@ def add_students(courses_and_group_by_students: dict,
                     select(course_table.c.course_id).where(course_table.c.course_name == course_name)).first()
                 session.execute(insert(course_student_table).values(course_id=course_id, student_id=student_id))
         session.commit()
+
+
+def add_test_data_to_db(student_group_table: Table,
+                        course_table: Table,
+                        student_table: Table,
+                        course_student_table: Table,
+                        session):
+
+    generated_students = generate_students()
+    generated_groups = generate_groups()
+
+    students_by_groups = assign_students_to_groups(generated_students, generated_groups)
+    courses_by_students = assign_courses_to_students(generated_students)
+    courses_and_group_by_students = get_courses_and_group_by_students(courses_by_students, students_by_groups)
+
+    add_groups(generated_groups, student_group_table, session)
+    add_courses(COURSES, course_table, session)
+    add_students(courses_and_group_by_students, student_group_table, student_table, course_table, course_student_table, session)
+
+    return {'students': generated_students,
+            'groups': generated_groups,
+            'students_by_groups': students_by_groups,
+            'courses_by_students': courses_by_students,
+            'courses_and_group_by_students': courses_and_group_by_students
+            }
