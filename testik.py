@@ -107,7 +107,19 @@
 # # print(type(session))
 
 
-abc=1,2,3
-a, b, c = abc
 
-print(a)
+
+# print(sys.path)
+
+
+
+def run():
+    print('testik')
+
+# import os, sys
+# cwd = os.getcwd()
+# print(cwd)
+#
+#
+# print(sys.path)
+

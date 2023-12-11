@@ -1,6 +1,6 @@
 from sqlalchemy import URL, text, insert, select, create_engine, Table, MetaData
 from sqlalchemy.orm import sessionmaker
-from .generate_test_data import (assign_students_to_groups, assign_courses_to_students, generate_students,
+from docker.generate_test_data import (assign_students_to_groups, assign_courses_to_students, generate_students,
                                 get_courses_and_group_by_students, generate_groups, COURSES)
 
 
