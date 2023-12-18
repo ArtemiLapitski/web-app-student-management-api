@@ -20,6 +20,6 @@ CREATE TABLE course (
 
 CREATE TABLE course_student (
 	course_id INTEGER REFERENCES course(course_id),
-	student_id INTEGER REFERENCES student(student_id),
+	student_id INTEGER REFERENCES student(student_id) ON DELETE CASCADE,
 	PRIMARY KEY(course_id,student_id)
 );
