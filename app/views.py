@@ -1,11 +1,10 @@
 from flask_restful import Resource
-from app import (add_student, get_groups_lte_student_count, get_students_for_course, delete_student,
-                 get_student, add_course_to_student, delete_student_from_course)
-from sqlalchemy import select, func
-from flask_pydantic import validate
+from app.database.crud import (add_student, get_groups_lte_student_count, get_students_for_course, delete_student,
+                               get_student, add_course_to_student, delete_student_from_course)
+
 from flask import request, jsonify
 # from app import StudentCountToValidate
-from .schemas import (StudentCountToValidate, CourseNameToValidate, StudentToCreate, StudentIdToValidate,
+from app.schema.schemas import (StudentCountToValidate, CourseNameToValidate, StudentToCreate, StudentIdToValidate,
                       CourseToAdd, CourseToDelete)
 import json
 

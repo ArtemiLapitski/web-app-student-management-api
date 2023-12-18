@@ -1,13 +1,12 @@
 from flask import Flask
 from flask_restful import Api
-# from flasgger import Swagger
-from app import SECRET_KEY, add_urls
+from app.urls import add_urls
+from config import SECRET_KEY
 
 
 def create_app():
     app = Flask(__name__)
     app.config['SECRET_KEY'] = SECRET_KEY
-    # app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
     return app
 
 

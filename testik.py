@@ -113,8 +113,8 @@
 
 
 
-def run():
-    print('testik')
+# def run():
+#     print('testik')
 
 # import os, sys
 # cwd = os.getcwd()
@@ -123,3 +123,7 @@ def run():
 #
 # print(sys.path)
 
+lst1 = ['Luca Mora', 'Jackson Lowe', 'Chace Ford', 'Mackenzie Ford', 'Brianna Hamilton', 'Luca Chaney', 'Amiah Sharp', 'Jackson Sharp', 'Gaige Chaney', 'Brenna Sharp']
+lst2 = ['Brenna Sharp', 'Gaige Chaney', 'Jackson Sharp', 'Amiah Sharp', 'Luca Chaney', 'Brianna Hamilton', 'Mackenzie Ford', 'Chace Ford', 'Jackson Lowe', 'Luca Mora']
+lst2.reverse()
+assert lst1 == lst2

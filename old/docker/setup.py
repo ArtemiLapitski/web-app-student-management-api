@@ -6,24 +6,24 @@ from os import environ
 from sqlalchemy import URL, create_engine, text
 
 
-# SUPERUSER_USERNAME = environ['SUPERUSER_USERNAME']
-# SUPERUSER_PASSWORD = environ['SUPERUSER_PASSWORD']
-# USERNAME = environ['USERNAME']
-# PASSWORD = environ['PASSWORD']
-# DB_NAME = environ['DB_NAME']
-# ROLE = environ['ROLE']
-# PORT = int(environ['PORT'])
-# HOST = "host.docker.internal"
+SUPERUSER_USERNAME = environ['SUPERUSER_USERNAME']
+SUPERUSER_PASSWORD = environ['SUPERUSER_PASSWORD']
+USERNAME = environ['USERNAME']
+PASSWORD = environ['PASSWORD']
+DB_NAME = environ['DB_NAME']
+ROLE = environ['ROLE']
+PORT = int(environ['PORT'])
+HOST = "host.docker.internal"
 
 # to delete
-SUPERUSER_USERNAME='postgres'
-SUPERUSER_PASSWORD='1996'
-USERNAME='supervisor'
-PASSWORD='supervisor'
-DB_NAME='studentsdb'
-ROLE='students_admin'
-PORT=5432
-HOST = 'localhost'
+# SUPERUSER_USERNAME='postgres'
+# SUPERUSER_PASSWORD='1996'
+# USERNAME='supervisor'
+# PASSWORD='supervisor'
+# DB_NAME='studentsdb'
+# ROLE='students_admin'
+# PORT=5432
+# HOST = 'localhost'
 
 
 if __name__ == "__main__":
@@ -38,7 +38,7 @@ if __name__ == "__main__":
 
 
     course_table, student_group_table, student_table, course_student_table = (
-        create_tables(engine, 'create_tables.sql'))
+        create_tables(engine, 'docker/create_tables.sql'))
 
     session = get_session(engine)
     add_test_data_to_db(student_group_table,

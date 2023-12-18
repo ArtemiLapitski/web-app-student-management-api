@@ -4,7 +4,7 @@ from .schemas_validation import (student_count_validation, course_name_validatio
                                  course_id_validation, no_course_for_student_validation,
                                  course_exists_for_student_validation)
 from typing import Optional
-from app import check_course_for_student
+# from app import check_course_for_student
 
 
 class StudentCountToValidate(BaseModel):

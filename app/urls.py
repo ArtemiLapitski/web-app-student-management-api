@@ -1,4 +1,4 @@
-from app import Groups, Students, StudentsCourses
+from app.views import Groups, Students, StudentsCourses
 
 def add_urls(api):
     api.add_resource(Groups, '/groups')

@@ -1,5 +1,7 @@
 # from app import COURSES
-from app import get_list_of_courses, get_list_of_groups, check_student_id, check_course_id, check_course_for_student
+from app.database.crud import (get_list_of_courses, get_list_of_groups, check_student_id, check_course_id,
+                               check_course_for_student)
+
 
 all_courses = get_list_of_courses()
 all_groups = get_list_of_groups()
@@ -75,4 +77,3 @@ def course_exists_for_student_validation(self):
     is_course_for_student = check_course_for_student(student_id, course_id)
     if not is_course_for_student:
         raise ValueError(f"This course is not assigned to student")
-

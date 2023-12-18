@@ -1,18 +1,18 @@
-from sqlalchemy import insert, select, MetaData, delete, create_engine, Table, func, URL
+from sqlalchemy import insert, select, MetaData, delete, create_engine, func, URL
 from sqlalchemy.orm import sessionmaker
-from app.config import DATABASE_URL, USER_USERNAME, USER_PASSWORD
+from config import DB_USERNAME, DB_PASSWORD, DB_HOST, DB_NAME, DB_PORT
 
 
-user_studentsdb_url = URL.create(
+user_db_url = URL.create(
     "postgresql",
-    username=USER_USERNAME,
-    password=USER_PASSWORD,
-    host="localhost",
-    port=5432,
-    database="studentsdb"
+    username=DB_USERNAME,
+    password=DB_PASSWORD,
+    host=DB_HOST,
+    port=DB_PORT,
+    database=DB_NAME
 )
 
-engine = create_engine(user_studentsdb_url)
+engine = create_engine(user_db_url)
 
 
 Session = sessionmaker(engine)
@@ -27,45 +27,6 @@ course_table = metadata_obj.tables["course"]
 student_table = metadata_obj.tables["student"]
 student_group_table = metadata_obj.tables["student_group"]
 course_student_table = metadata_obj.tables["course_student"]
-
-# GET RID OF DEPENDENCY ON TABLES PARAMS IN 3 FUNCS BELOW
-
-
-def create_courses(courses_list: list, course_table: Table):
-    courses_list_of_dict = [{'course_name': course_name} for course_name in courses_list]
-    with session:
-        session.execute(insert(course_table).values(courses_list_of_dict))
-        session.commit()
-
-
-def create_groups(groups_list: list, student_group_table: Table):
-    groups_list_of_dict = [{'group_name': group} for group in groups_list]
-    with session:
-        session.execute(insert(student_group_table).values(groups_list_of_dict))
-        session.commit()
-
-
-def create_students(courses_and_group_by_students: dict,
-                 student_group_table: Table,
-                 student_table: Table,
-                 course_table: Table,
-                 course_student_table: Table):
-    with session:
-        for student_name, data in courses_and_group_by_students.items():
-            group = data['group']
-            if group != 'no_group':
-                group_id = session.scalars(
-                    select(student_group_table.c.group_id).where(student_group_table.c.group_name == group)).first()
-                student_id = session.execute(insert(student_table).values(
-                    group_id=group_id, first_name=student_name[1], last_name=student_name[2])).inserted_primary_key[0]
-            else:
-                student_id = session.execute(
-                    insert(student_table).values(first_name=student_name[1], last_name=student_name[2])).inserted_primary_key[0]
-            for course_name in data['courses']:
-                course_id = session.scalars(
-                    select(course_table.c.course_id).where(course_table.c.course_name == course_name)).first()
-                session.execute(insert(course_student_table).values(course_id=course_id, student_id=student_id))
-        session.commit()
 
 
 def add_student(first_name: str, last_name: str, courses: list, group: str = None):
@@ -158,11 +119,6 @@ def get_list_of_groups() -> list:
 
     return [group[0] for group in all_groups]
 
-# new_student = {'first_name': 'Artemi',
-#                'last_name': 'Lapitski',
-#                'courses': ['Mathematics', 'Science', 'English'],
-#                'group': 'no_group'}
-
 
 def delete_student(student_id: int):
     with session:
@@ -203,4 +159,3 @@ def delete_student_from_course(student_id: int, course_id: int):
                         .where(course_student_table.c.student_id == student_id)
                         .where(course_student_table.c.course_id == course_id))
         session.commit()
-
