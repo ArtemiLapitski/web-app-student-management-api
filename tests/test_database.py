@@ -105,18 +105,16 @@ def test_students_by_groups(setup_db, create_test_tables, add_test_data):
 #         courses_by_students_from_bd = session.execute(
 #             select(
 #                 course_student_table.c.student_id,
-#                 # student_table.c.first_name,
 #                 func.array_agg(course_table.c.course_name)
 #             )
-#             # .select_from(course_student_table)
 #             .join(course_table, course_table.c.course_id == course_student_table.c.course_id)
-#             # .join(course_student_table, course_student_table.c.student_id == student_table.c.student_id)
 #             .group_by(course_student_table.c.student_id)
-#
-#
 #         ).all()
 #
-#     print(courses_by_students_from_bd)
+#         print(courses_by_students_from_bd)
+#         print(len(courses_by_students_from_bd))
+#         print(courses_by_students.items())
+#         print(len(courses_by_students.items()))
 
 
 
@@ -131,7 +129,6 @@ def test_courses_by_students(setup_db, create_test_tables, add_test_data):
     with (session):
         courses_by_students_from_bd = session.execute(
             select(
-                # course_student_table.c.student_id,
                 func.concat(student_table.c.first_name, ' ', student_table.c.last_name),
                 func.array_agg(course_table.c.course_name)
             )
@@ -140,9 +137,9 @@ def test_courses_by_students(setup_db, create_test_tables, add_test_data):
             .join(student_table, course_student_table.c.student_id == student_table.c.student_id)
             .group_by(func.concat(student_table.c.first_name, ' ', student_table.c.last_name))
 
-
         ).all()
 
     print(courses_by_students_from_bd)
     print(len(courses_by_students_from_bd))
     print(courses_by_students.items())
+    print(len(courses_by_students.items()))

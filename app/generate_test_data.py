@@ -76,3 +76,34 @@ def get_courses_and_group_by_students(courses_by_students: dict, students_by_gro
             courses_by_students[student]['group'] = group
 
     return courses_by_students
+
+
+# def get_courses_and_group_by_students(courses_by_students: dict, students_by_groups: dict):
+#     # print(courses_by_students)
+#     courses_and_group_by_students = courses_by_students.copy()
+#     # print(courses_and_group_by_students)
+#     for group, students in students_by_groups.items():
+#         for student in students:
+#             # print(courses_by_students[student])
+#             courses_and_group_by_students[student]['group'] = group
+#             # print(courses_by_students[student])
+#     # print(courses_by_students)
+#     return courses_and_group_by_students
+
+
+
+# generated_students = generate_students()
+# generated_groups = generate_groups()
+
+# students_by_groups = assign_students_to_groups(generated_students, generated_groups)
+# courses_by_students = assign_courses_to_students(generated_students)
+# courses_and_group_by_students = get_courses_and_group_by_students(courses_by_students, students_by_groups)
+# print(students_by_groups)
+# print(courses_by_students)
+# students_by_groups = {'JX-80': [(200, 'Mackenzie', 'Armstrong'), (199, 'Shyann', 'Cannon')]}
+# courses_by_students = {(199, 'Shyann', 'Cannon'): {'courses': ['English']}, (200, 'Mackenzie', 'Armstrong'): {'courses': ['Chemistry', 'Science', 'Physical Education']}}
+# print(courses_by_students)
+# print(courses_and_group_by_students)
+
+# courses_and_group_by_students = get_courses_and_group_by_students(courses_by_students, students_by_groups)
+

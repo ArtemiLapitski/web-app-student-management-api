@@ -119,18 +119,27 @@ def add_students(courses_and_group_by_students: dict,
         session.commit()
 
 
+generated_students = generate_students()
+generated_groups = generate_groups()
+
+students_by_groups = assign_students_to_groups(generated_students, generated_groups)
+courses_by_students = assign_courses_to_students(generated_students)
+courses_and_group_by_students = get_courses_and_group_by_students(courses_by_students, students_by_groups)
+
+
+
 def add_and_retrieve_test_data(student_group_table: Table,
                         course_table: Table,
                         student_table: Table,
                         course_student_table: Table,
                         session):
 
-    generated_students = generate_students()
-    generated_groups = generate_groups()
-
-    students_by_groups = assign_students_to_groups(generated_students, generated_groups)
-    courses_by_students = assign_courses_to_students(generated_students)
-    courses_and_group_by_students = get_courses_and_group_by_students(courses_by_students, students_by_groups)
+    # generated_students = generate_students()
+    # generated_groups = generate_groups()
+    #
+    # students_by_groups = assign_students_to_groups(generated_students, generated_groups)
+    # courses_by_students = assign_courses_to_students(generated_students)
+    # courses_and_group_by_students = get_courses_and_group_by_students(courses_by_students, students_by_groups)
 
     add_groups(generated_groups, student_group_table, session)
     add_courses(COURSES, course_table, session)

@@ -1,11 +1,13 @@
 import pytest
-from app import (GROUP_SIZES, COURSES_AMOUNT_PER_STUDENT, assign_students_to_groups, assign_courses_to_students,
-                 generate_students, get_courses_and_group_by_students, generate_groups)
+# from app import (GROUP_SIZES, COURSES_AMOUNT_PER_STUDENT, assign_students_to_groups, assign_courses_to_students,
+#                  generate_students, get_courses_and_group_by_students, generate_groups)
+from app.generate_test_data import generate_students, generate_groups, assign_students_to_groups, assign_courses_to_students
+from config import STUDENTS_PER_GROUP_MAX, STUDENTS_PER_GROUP_MIN, COURSES
 
-group_sizes_for_testing = GROUP_SIZES.copy()
-group_sizes_for_testing.append(0)
-
-students = generate_students()
+# group_sizes_for_testing = GROUP_SIZES.copy()
+# group_sizes_for_testing.append(0)
+#
+# students = generate_students()
 
 
 @pytest.mark.parametrize('execution_number', range(100))
@@ -22,6 +24,7 @@ def test_generate_groups(execution_number):
 
 @pytest.mark.parametrize('execution_number', range(100))
 def test_assign_students_to_groups(execution_number):
+    students = generate_students()
     groups = generate_groups()
     students_by_groups = assign_students_to_groups(students, groups)
 
@@ -29,18 +32,22 @@ def test_assign_students_to_groups(execution_number):
     for group, students_per_group in students_by_groups.items():
         total_students.append(len(students_per_group))
         if group != "no_group":
-            assert len(students_per_group) in group_sizes_for_testing
+            assert STUDENTS_PER_GROUP_MIN <= len(students_per_group) <= STUDENTS_PER_GROUP_MAX
 
     assert sum(total_students) == 200
 
 
 @pytest.mark.parametrize('execution_number', range(100))
 def test_assign_courses_to_students(execution_number):
+    students = generate_students()
     courses_by_students = assign_courses_to_students(students)
 
     for _, courses in courses_by_students.items():
         assert len(courses) in (1, 2, 3)
         assert len(courses) == len(set(courses))
+        print(courses)
+        # for course in courses:
+        #     assert course in COURSES
     assert len(courses_by_students.keys()) == 200
 
 
