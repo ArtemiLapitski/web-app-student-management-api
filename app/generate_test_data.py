@@ -58,27 +58,6 @@ def assign_students_to_groups(students: list, groups: list) -> dict:
     return students_by_groups
 
 
-# def assign_courses_to_students(students: list) -> dict:
-#
-#     courses_by_students = {student: {'courses': []} for student in students}
-#     for student in students:
-#         courses_amount = randint(COURSES_PER_STUDENT_MIN, COURSES_PER_STUDENT_MAX)
-#         while len(courses_by_students[student]['courses']) < courses_amount:
-#             course = choice(COURSES)
-#             if course not in courses_by_students[student]['courses']:
-#                 courses_by_students[student]['courses'].append(course)
-#
-#     return courses_by_students
-#
-#
-# def get_courses_and_group_by_students(courses_by_students: dict, students_by_groups: dict):
-#     courses_and_group_by_students = deepcopy(courses_by_students)
-#     for group, students in students_by_groups.items():
-#         for student in students:
-#             courses_and_group_by_students[student]['group'] = group
-#
-#     return courses_and_group_by_students
-
 def assign_courses_to_students(students: list) -> dict:
 
     courses_by_students = {student: [] for student in students}
@@ -101,18 +80,17 @@ def get_courses_and_group_by_students(courses_by_students: dict, students_by_gro
     return courses_and_group_by_students
 
 
-# students = generate_students()
-#
-# courses_by_students = assign_courses_to_students(students)
-#
-# print(courses_by_students)
-#
-# groups = generate_groups()
-#
-# students_by_groups = assign_students_to_groups(students, groups)
-#
-# courses_and_group_by_students = get_courses_and_group_by_students(courses_by_students, students_by_groups)
-#
-# print(courses_and_group_by_students)
-#
-# print(courses_by_students)
+def generate_test_data():
+    generated_students = generate_students()
+    generated_groups = generate_groups()
+
+    students_by_groups = assign_students_to_groups(generated_students, generated_groups)
+    courses_by_students = assign_courses_to_students(generated_students)
+    courses_and_group_by_students = get_courses_and_group_by_students(courses_by_students, students_by_groups)
+
+    return {'generated_students': generated_students,
+            'generated_groups': generated_groups,
+            'students_by_groups': students_by_groups,
+            'courses_by_students': courses_by_students,
+            'courses_and_group_by_students': courses_and_group_by_students
+            }

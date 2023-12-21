@@ -1,51 +1,28 @@
-# from main import create_app, create_api
-# from app import add_urls, USER_PASSWORD, USER_USERNAME
-# import pytest
-# from sqlalchemy import URL, create_engine, text
-# from sqlalchemy.orm import sessionmaker
-#
-#
-# @pytest.fixture()
-# def app():
-#     app = create_app()
-#     return app
-#
-#
-# @pytest.fixture()
-# def client(app):
-#     api = create_api(app)
-#     add_urls(api)
-#     return app.test_client()
-
-
-# @pytest.fixture(scope="module")
-# def mock_database_path():
-#     testing_url = URL.create(
-#         "postgresql",
-#         username=USER_USERNAME,
-#         password=USER_PASSWORD,
-#         host="localhost",
-#         port=5432
-#     )
-#     engine = create_engine(testing_url)
-#     connection = engine.connect()
-#     with connection:
-#         connection.execution_options(isolation_level="AUTOCOMMIT")
-#         connection.execute(text("CREATE DATABASE testdb"))
-#
-#     Session = sessionmaker(engine)
-#     session = Session()
-#
-#     return session
-
 from sqlalchemy import URL, create_engine, text
-from app.database.setup import create_db, create_tables, get_session, add_and_retrieve_test_data
+from app.database.setup import create_db, create_tables, get_session, add_test_data, get_table_object
 from pytest import fixture
 from config import (TEST_DB_USERNAME, TEST_DB_PASSWORD, TEST_DB_ROLE, TEST_DB_NAME, DB_HOST, DB_SUPERUSER_PASSWORD,
                     DB_SUPERUSER_USERNAME, DB_PORT, CREATE_TABLES_FILE_PATH)
+from app.generate_test_data import generate_test_data
+from main import create_app, create_api
+from app.urls import add_urls
 
 
-@fixture(scope='function')
+
+@fixture()
+def app():
+    app = create_app()
+    return app
+
+
+@fixture()
+def client(app):
+    api = create_api(app)
+    add_urls(api)
+    return app.test_client()
+
+
+@fixture(scope='module')
 def setup_db(request):
     engine = create_db(DB_SUPERUSER_USERNAME,
                        DB_SUPERUSER_PASSWORD,
@@ -74,32 +51,36 @@ def setup_db(request):
     request.addfinalizer(teardown)
 
     return engine
+# (autouse=True)
 
-
-@fixture(scope='function')
+@fixture(scope='module')
 def create_test_tables(setup_db):
 
     engine = setup_db
 
-    course_table, student_group_table, student_table, course_student_table = (
-        create_tables(engine, CREATE_TABLES_FILE_PATH))
-
-    return course_table, student_group_table, student_table, course_student_table
+    create_tables(engine, CREATE_TABLES_FILE_PATH)
 
 
-@fixture(scope='function')
-def add_test_data(setup_db, create_test_tables):
-
+@fixture(scope='module')
+def generate_and_add_data(setup_db, create_test_tables):
     engine = setup_db
 
-    course_table, student_group_table, student_table, course_student_table = create_test_tables
+    course_table = get_table_object(engine, 'course')
+    student_group_table = get_table_object(engine, 'student_group')
+    student_table = get_table_object(engine, 'student')
+    course_student_table = get_table_object(engine, 'course_student')
 
     session = get_session(engine)
 
-    test_data = add_and_retrieve_test_data(student_group_table,
-                                           course_table,
-                                           student_table,
-                                           course_student_table,
-                                           session)
+    generated_test_data = generate_test_data()
 
-    return test_data
+    add_test_data(
+        session,
+      student_group_table,
+      course_table,
+      student_table,
+      course_student_table,
+    **generated_test_data
+    )
+
+    return generated_test_data

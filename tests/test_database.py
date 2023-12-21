@@ -1,6 +1,8 @@
-from sqlalchemy import select, func, literal_column
-from app.database.setup import get_session
+from sqlalchemy import select, func
+from app.database.setup import get_session, get_table_object
 from config import COURSES
+from pytest import mark
+from app.generate_test_data import generate_groups
 
 # SUPERUSER_USERNAME='postgres'
 # SUPERUSER_PASSWORD='1996'
@@ -12,10 +14,10 @@ from config import COURSES
 # HOST='localhost'
 
 
-def test_students(setup_db, create_test_tables, add_test_data):
+def test_students(setup_db, create_test_tables, generate_and_add_data):
     engine = setup_db
-    _, _, student_table, _ = create_test_tables
-    generated_students = add_test_data['generated_students']
+    student_table = get_table_object(engine, 'student')
+    generated_students = generate_and_add_data['generated_students']
 
     session = get_session(engine)
 
@@ -27,10 +29,10 @@ def test_students(setup_db, create_test_tables, add_test_data):
     assert len(students_from_db) == 200
 
 
-def test_groups(setup_db, create_test_tables, add_test_data):
+def test_groups(setup_db, create_test_tables, generate_and_add_data):
     engine = setup_db
-    _, student_group_table, _, _ = create_test_tables
-    generated_groups = add_test_data['generated_groups']
+    student_group_table = get_table_object(engine, 'student_group')
+    generated_groups = generate_and_add_data['generated_groups']
 
     session = get_session(engine)
 
@@ -43,10 +45,10 @@ def test_groups(setup_db, create_test_tables, add_test_data):
     assert len(groups_from_db) == 10
 
 
-def test_courses(setup_db, create_test_tables, add_test_data):
+def test_courses(setup_db, create_test_tables, generate_and_add_data):
     engine = setup_db
-    course_table, _, _, _ = create_test_tables
 
+    course_table = get_table_object(engine, 'course')
     session = get_session(engine)
 
     with session:
@@ -57,69 +59,22 @@ def test_courses(setup_db, create_test_tables, add_test_data):
     assert courses == COURSES
 
 
-# def test_students_by_groups(setup_db, create_test_tables, add_test_data):
-#     engine = setup_db
-#     _, student_group_table, student_table, _ = create_test_tables
-#     students_by_groups = add_test_data['students_by_groups']
-#
-#     print(students_by_groups)
-#
-#     students_by_groups_new = {}
-#     for group, students in students_by_groups.items():
-#         student_list_new = []
-#         for student in students:
-#             student_list_new.append(f"{student[1]} {student[2]}")
-#         student_list_new.reverse()
-#         students_by_groups_new[group] = student_list_new
-#
-#     print(students_by_groups_new)
-#
-#     session = get_session(engine)
-#
-#     with session:
-#
-#         students_by_groups_from_db = session.execute(select(
-#             student_group_table.c.group_name,
-#             func.array_agg(func.concat(student_table.c.first_name, ' ', student_table.c.last_name)))
-#             .join(student_table, student_table.c.group_id == student_group_table.c.group_id)
-#             .group_by(student_group_table.c.group_name)
-#             ).all()
-#
-#         students_without_group = session.execute(select(student_table.c.first_name, student_table.c.last_name)
-#                                                  .where(student_table.c.group_id == None)).all()
-#
-#     print(students_by_groups_from_db)
-#
-#     students_without_group = [f"{student[0]} {student[1]}" for student in students_without_group]
-#     students_by_groups_from_db = {data[0]: data[1] for data in students_by_groups_from_db}
-#
-#     students_without_group.reverse()
-#     students_by_groups_from_db['no_group'] = students_without_group
-#
-#     assert students_by_groups_new == students_by_groups_from_db
-
-
-def test_students_by_groups(setup_db, create_test_tables, add_test_data):
+# @mark.parametrize('execution_number', range(100))
+def test_students_by_groups(setup_db, create_test_tables, generate_and_add_data):
     engine = setup_db
-    _, student_group_table, student_table, _ = create_test_tables
-    students_by_groups = add_test_data['students_by_groups']
 
-    # print(students_by_groups)
-    #
-    # students_by_groups_new = {}
-    # for group, students in students_by_groups.items():
-    #     student_list = []
-    #     for student in students:
-    #         student_list_new.append(f"{student[1]} {student[2]}")
-    #     student_list_new.reverse()
-    #     students_by_groups_new[group] = student_list_new
+    student_group_table = get_table_object(engine, 'student_group')
+    student_table = get_table_object(engine, 'student')
+
+    # _, student_group_table, student_table, _ = create_test_tables
+    students_by_groups = generate_and_add_data['students_by_groups']
 
     for group, students in students_by_groups.items():
-        
+        students_no_id = [' '.join(student[1:]) for student in students]
+        students_no_id.reverse()
+        students_by_groups[group] = students_no_id
 
-    print(students_by_groups)
-    # students_by_groups = [(group, students.pop()) for group, students in students_by_groups.items() for student in students]
-    print(students_by_groups)
+    # print(students_by_groups)
     session = get_session(engine)
 
     with session:
@@ -134,22 +89,32 @@ def test_students_by_groups(setup_db, create_test_tables, add_test_data):
         students_without_group = session.execute(select(student_table.c.first_name, student_table.c.last_name)
                                                  .where(student_table.c.group_id == None)).all()
 
-    print(students_by_groups_from_db)
-    # students_by_groups_from_db
+    students_by_groups_from_db_dict = {data[0]: data[1] for data in students_by_groups_from_db}
+    if students_without_group:
+        students_without_group_strings = [' '.join(student) for student in students_without_group]
+        students_without_group_strings.reverse()
+        students_by_groups_from_db_dict['no_group'] = students_without_group_strings
 
-    # students_without_group = [f"{student[0]} {student[1]}" for student in students_without_group]
-    # students_by_groups_from_db = {data[0]: data[1] for data in students_by_groups_from_db}
-    #
-    # students_without_group.reverse()
-    # students_by_groups_from_db['no_group'] = students_without_group
+    # try:
+    assert students_by_groups == students_by_groups_from_db_dict
+    # except AssertionError:
+    #     print('from db', students_by_groups_from_db_dict['no_group'], students_without_group)
+    #     print('print_new')
+    #     print('from generated', students_by_groups['no_group'])
+    #     raise AssertionError
 
-    # assert students_by_groups_new == students_by_groups_from_db
 
-def test_courses_by_students(setup_db, create_test_tables, add_test_data):
+
+
+# @mark.parametrize('execution_number', range(100))
+def test_courses_by_students(setup_db, create_test_tables, generate_and_add_data):
     engine = setup_db
-    course_table, student_group_table, student_table, course_student_table = create_test_tables
-    generated_students = add_test_data['generated_students']
-    courses_by_students = add_test_data['courses_by_students']
+
+    course_table = get_table_object(engine, 'course')
+    student_table = get_table_object(engine, 'student')
+    course_student_table = get_table_object(engine, 'course_student')
+
+    courses_by_students = generate_and_add_data['courses_by_students']
 
     session = get_session(engine)
 
@@ -166,12 +131,13 @@ def test_courses_by_students(setup_db, create_test_tables, add_test_data):
 
         ).all()
 
-    courses_by_students_from_bd = [((int(student.split()[0]), student.split()[1], student.split()[2]), courses) for student, courses in courses_by_students_from_bd]
-    courses_by_students_from_bd = sorted(courses_by_students_from_bd, key=lambda item: item[0])
+    courses_by_students_from_bd = {(int(student.split()[0]), student.split()[1], student.split()[2]): courses for student, courses in courses_by_students_from_bd}
+    # courses_by_students_from_bd = sorted(courses_by_students_from_bd.items(), key=lambda item: item[0])
+    # print(courses_by_students_from_bd)
 
-    courses_by_students = [(student, courses) for student, courses in courses_by_students.items()]
-
-    print(courses_by_students)
-    print(courses_by_students_from_bd)
+    # courses_by_students = [(student, courses) for student, courses in courses_by_students.items()]
+    #
+    # print(courses_by_students)
+    # print(courses_by_students_from_bd)
 
     assert courses_by_students_from_bd == courses_by_students

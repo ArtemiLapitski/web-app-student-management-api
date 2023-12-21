@@ -1,12 +1,25 @@
+from sqlalchemy import URL
 
 
+TEST_DB_USERNAME = 'supervisor_test'
+TEST_DB_PASSWORD = 'supervisor_test'
+TEST_DB_NAME = 'studentsdb_test'
+TEST_DB_ROLE = 'students_admin_test'
+DB_HOST = 'localhost'
 
 
-# dict1 = {'mike':[1], 'mike2': [2]}
-#
-# dict2 = {'mike2': [2], 'mike': [1]}
+superuser_db_url = URL.create(
+    "postgresql",
+    username=TEST_DB_USERNAME,
+    password=TEST_DB_PASSWORD,
+    host=DB_HOST,
+    port=5432,
+    database=TEST_DB_NAME
+)
 
-lst1 = (1,2,3)
-lst2 = (3,2,1)
 
-assert lst2 == lst1
+print(superuser_db_url)
+
+'postgresql://supervisor_test:supervisor_test@localhost:5432/studentsdb_test'
+
+# print(help(URL.create))

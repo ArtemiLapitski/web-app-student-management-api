@@ -1,9 +1,10 @@
 # from docker.database import create_db, create_tables, add_test_data_to_db, get_session
-from app.database.setup import create_db, create_tables, add_and_retrieve_test_data, get_session
+from app.database.setup import create_db, create_tables, add_test_data, get_session, get_table_object
 from os import environ
+from config import CREATE_TABLES_FILE_PATH
 # to delete
-from sqlalchemy import URL, create_engine, text
-
+# from sqlalchemy import URL, create_engine, text
+from app.generate_test_data import generate_test_data
 
 SUPERUSER_USERNAME = environ['DB_SUPERUSER_USERNAME']
 SUPERUSER_PASSWORD = environ['DB_SUPERUSER_PASSWORD']
@@ -35,16 +36,37 @@ if __name__ == "__main__":
                        port=PORT,
                        host=HOST)
 
+    create_tables(engine, CREATE_TABLES_FILE_PATH)
 
-    course_table, student_group_table, student_table, course_student_table = (
-        create_tables(engine, 'app/database/create_tables.sql'))
+    # course_table, student_group_table, student_table, course_student_table = (
+    #     create_tables(engine, 'app/database/create_tables.sql'))
+    course_table = get_table_object(engine, 'course')
+    student_group_table = get_table_object(engine, 'student_group')
+    student_table = get_table_object(engine, 'student')
+    course_student_table = get_table_object(engine, 'course_student')
+
+    generated_test_data = generate_test_data()
 
     session = get_session(engine)
-    add_and_retrieve_test_data(student_group_table,
-                               course_table,
-                               student_table,
-                               course_student_table,
-                               session)
+
+    add_test_data(
+        session,
+        student_group_table,
+        course_table,
+        student_table,
+        course_student_table,
+        **generated_test_data
+    )
+
+
+
+    # add_and_retrieve_test_data(student_group_table,
+    #                            course_table,
+    #                            student_table,
+    #                            course_student_table,
+    #                            session)
+
+
 
     # to delete
     # superuser_url = URL.create(

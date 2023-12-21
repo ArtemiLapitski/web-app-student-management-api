@@ -1,6 +1,15 @@
 from sqlalchemy import insert, select, MetaData, delete, create_engine, func, URL
 from sqlalchemy.orm import sessionmaker
+# from sqlalchemy.URL import create
 from config import DB_USERNAME, DB_PASSWORD, DB_HOST, DB_NAME, DB_PORT
+from app.database.setup import get_session, get_table_object
+# from app.database.tables import session, course_table, student_table, course_student_table, student_group_table
+# from app.database.tables import engine
+# from app.database.tables import user_db_url
+from app.database.setup import create_student_table, create_group_table
+
+
+# user_db_url = 'postgresql://supervisor_test:supervisor_test@localhost:5432/studentsdb_test'
 
 
 user_db_url = URL.create(
@@ -14,18 +23,20 @@ user_db_url = URL.create(
 
 engine = create_engine(user_db_url)
 
-
-Session = sessionmaker(engine)
-session = Session()
+session = get_session(engine)
 
 
 metadata_obj = MetaData()
 metadata_obj.reflect(bind=engine)
 
 
+
+# student_table = metadata_obj.tables["student"]
+# student_group_table = metadata_obj.tables["student_group"]
+student_table = create_student_table(metadata_obj)
+student_group_table = create_group_table(metadata_obj)
+
 course_table = metadata_obj.tables["course"]
-student_table = metadata_obj.tables["student"]
-student_group_table = metadata_obj.tables["student_group"]
 course_student_table = metadata_obj.tables["course_student"]
 
 

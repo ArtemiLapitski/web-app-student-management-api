@@ -36,3 +36,14 @@ TEST_DB_USERNAME = 'supervisor_test'
 TEST_DB_PASSWORD = 'supervisor_test'
 TEST_DB_NAME = 'studentsdb_test'
 TEST_DB_ROLE = 'students_admin_test'
+
+
+# COURSE_TABLE_NAME = "course"
+# STUDENT_TABLE_NAME = "student"
+# STUDENT_GROUP_NAME = "student_group"
+# COURSE_STUDENT_NAME = "course_student"
+
+# course_table = metadata_obj.tables["course"]
+# student_table = metadata_obj.tables["student"]
+# student_group_table = metadata_obj.tables["student_group"]
+# course_student_table = metadata_obj.tables["course_student"]
