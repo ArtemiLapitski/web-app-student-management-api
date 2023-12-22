@@ -20,9 +20,3 @@ if __name__ == '__main__':
     api = create_api(app)
     add_urls(api)
     app.run(debug=True)
-
-
-
-
-
-

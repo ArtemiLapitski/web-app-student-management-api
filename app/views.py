@@ -1,10 +1,9 @@
 from flask_restful import Resource
 from app.database.crud import (add_student, get_groups_lte_student_count, get_students_for_course, delete_student,
                                get_student, add_course_to_student, delete_student_from_course)
-
 from flask import request
 from app.schema.schemas import (StudentCountToValidate, CourseNameToValidate, StudentToCreate, StudentIdToValidate,
-                      CourseToAdd, CourseToDelete)
+                                CourseToAdd, CourseToDelete)
 
 
 class Groups(Resource):
@@ -52,7 +51,3 @@ class StudentsCourses(Resource):
         data = CourseToDelete(student_id=student_id, course_id=course_id)
         delete_student_from_course(student_id=data.student_id, course_id=data.course_id)
         return {'mssg': f"Course with {course_id} id has been deleted"}
-
-
-
-

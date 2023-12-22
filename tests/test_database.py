@@ -1,22 +1,14 @@
 from sqlalchemy import select, func
-from app.database.setup import get_session, get_table_object
+from app.database.setup import (get_session, get_course_table, get_student_group_table, get_student_table,
+                                get_course_student_table, get_metadata_obj)
 from config import COURSES
-from pytest import mark
-from app.generate_test_data import generate_groups
-
-# SUPERUSER_USERNAME='postgres'
-# SUPERUSER_PASSWORD='1996'
-# USERNAME='supervisor_test'
-# PASSWORD='supervisor_test'
-# DB_NAME='studentsdb_test'
-# ROLE='students_admin_test'
-# PORT=5432
-# HOST='localhost'
 
 
 def test_students(setup_db, create_test_tables, generate_and_add_data):
     engine = setup_db
-    student_table = get_table_object(engine, 'student')
+    metadata_obj = get_metadata_obj(engine)
+
+    student_table = get_student_table(metadata_obj)
     generated_students = generate_and_add_data['generated_students']
 
     session = get_session(engine)
@@ -31,7 +23,10 @@ def test_students(setup_db, create_test_tables, generate_and_add_data):
 
 def test_groups(setup_db, create_test_tables, generate_and_add_data):
     engine = setup_db
-    student_group_table = get_table_object(engine, 'student_group')
+    metadata_obj = get_metadata_obj(engine)
+
+    student_group_table = get_student_group_table(metadata_obj)
+
     generated_groups = generate_and_add_data['generated_groups']
 
     session = get_session(engine)
@@ -48,7 +43,10 @@ def test_groups(setup_db, create_test_tables, generate_and_add_data):
 def test_courses(setup_db, create_test_tables, generate_and_add_data):
     engine = setup_db
 
-    course_table = get_table_object(engine, 'course')
+    metadata_obj = get_metadata_obj(engine)
+
+    course_table = get_course_table(metadata_obj)
+
     session = get_session(engine)
 
     with session:
@@ -59,22 +57,22 @@ def test_courses(setup_db, create_test_tables, generate_and_add_data):
     assert courses == COURSES
 
 
-# @mark.parametrize('execution_number', range(100))
 def test_students_by_groups(setup_db, create_test_tables, generate_and_add_data):
-    engine = setup_db
 
-    student_group_table = get_table_object(engine, 'student_group')
-    student_table = get_table_object(engine, 'student')
-
-    # _, student_group_table, student_table, _ = create_test_tables
     students_by_groups = generate_and_add_data['students_by_groups']
 
     for group, students in students_by_groups.items():
-        students_no_id = [' '.join(student[1:]) for student in students]
-        students_no_id.reverse()
-        students_by_groups[group] = students_no_id
+        students_name_only = [' '.join(student[1:]) for student in students]
+        students_name_only.reverse()
+        students_by_groups[group] = students_name_only
 
-    # print(students_by_groups)
+    engine = setup_db
+
+    metadata_obj = get_metadata_obj(engine)
+
+    student_group_table = get_student_group_table(metadata_obj)
+    student_table = get_student_table(metadata_obj)
+
     session = get_session(engine)
 
     with session:
@@ -95,49 +93,44 @@ def test_students_by_groups(setup_db, create_test_tables, generate_and_add_data)
         students_without_group_strings.reverse()
         students_by_groups_from_db_dict['no_group'] = students_without_group_strings
 
-    # try:
     assert students_by_groups == students_by_groups_from_db_dict
-    # except AssertionError:
-    #     print('from db', students_by_groups_from_db_dict['no_group'], students_without_group)
-    #     print('print_new')
-    #     print('from generated', students_by_groups['no_group'])
-    #     raise AssertionError
 
 
-
-
-# @mark.parametrize('execution_number', range(100))
 def test_courses_by_students(setup_db, create_test_tables, generate_and_add_data):
     engine = setup_db
 
-    course_table = get_table_object(engine, 'course')
-    student_table = get_table_object(engine, 'student')
-    course_student_table = get_table_object(engine, 'course_student')
+    metadata_obj = get_metadata_obj(engine)
 
-    courses_by_students = generate_and_add_data['courses_by_students']
+    course_table = get_course_table(metadata_obj)
+    student_table = get_student_table(metadata_obj)
+    course_student_table = get_course_student_table(metadata_obj)
 
     session = get_session(engine)
 
     with (session):
         courses_by_students_from_bd = session.execute(
             select(
-                func.concat(student_table.c.student_id, ' ', student_table.c.first_name, ' ', student_table.c.last_name),
+                func.concat(student_table.c.student_id,
+                            ' ',
+                            student_table.c.first_name,
+                            ' ',
+                            student_table.c.last_name
+                            ),
                 func.array_agg(course_table.c.course_name)
             )
             .select_from(course_student_table)
             .join(course_table, course_table.c.course_id == course_student_table.c.course_id)
             .join(student_table, course_student_table.c.student_id == student_table.c.student_id)
-            .group_by(func.concat(student_table.c.student_id, ' ', student_table.c.first_name, ' ', student_table.c.last_name))
+            .group_by(func.concat(student_table.c.student_id,
+                                  ' ',
+                                  student_table.c.first_name,
+                                  ' ',
+                                  student_table.c.last_name))
 
         ).all()
 
     courses_by_students_from_bd = {(int(student.split()[0]), student.split()[1], student.split()[2]): courses for student, courses in courses_by_students_from_bd}
-    # courses_by_students_from_bd = sorted(courses_by_students_from_bd.items(), key=lambda item: item[0])
-    # print(courses_by_students_from_bd)
 
-    # courses_by_students = [(student, courses) for student, courses in courses_by_students.items()]
-    #
-    # print(courses_by_students)
-    # print(courses_by_students_from_bd)
+    courses_by_students = generate_and_add_data['courses_by_students']
 
     assert courses_by_students_from_bd == courses_by_students

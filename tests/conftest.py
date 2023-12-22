@@ -1,12 +1,12 @@
 from sqlalchemy import URL, create_engine, text
-from app.database.setup import create_db, create_tables, get_session, add_test_data, get_table_object
+from app.database.setup import (create_db, create_tables, get_session, add_test_data, get_student_table,
+                                get_course_student_table, get_student_group_table, get_course_table, get_metadata_obj)
 from pytest import fixture
 from config import (TEST_DB_USERNAME, TEST_DB_PASSWORD, TEST_DB_ROLE, TEST_DB_NAME, DB_HOST, DB_SUPERUSER_PASSWORD,
                     DB_SUPERUSER_USERNAME, DB_PORT, CREATE_TABLES_FILE_PATH)
 from app.generate_test_data import generate_test_data
 from main import create_app, create_api
 from app.urls import add_urls
-
 
 
 @fixture()
@@ -51,7 +51,7 @@ def setup_db(request):
     request.addfinalizer(teardown)
 
     return engine
-# (autouse=True)
+
 
 @fixture(scope='module')
 def create_test_tables(setup_db):
@@ -65,10 +65,12 @@ def create_test_tables(setup_db):
 def generate_and_add_data(setup_db, create_test_tables):
     engine = setup_db
 
-    course_table = get_table_object(engine, 'course')
-    student_group_table = get_table_object(engine, 'student_group')
-    student_table = get_table_object(engine, 'student')
-    course_student_table = get_table_object(engine, 'course_student')
+    metadata_obj = get_metadata_obj(engine)
+
+    course_table = get_course_table(metadata_obj)
+    student_group_table = get_student_group_table(metadata_obj)
+    student_table = get_student_table(metadata_obj)
+    course_student_table = get_course_student_table(metadata_obj)
 
     session = get_session(engine)
 
@@ -76,11 +78,11 @@ def generate_and_add_data(setup_db, create_test_tables):
 
     add_test_data(
         session,
-      student_group_table,
-      course_table,
-      student_table,
-      course_student_table,
-    **generated_test_data
+        student_group_table,
+        course_table,
+        student_table,
+        course_student_table,
+        **generated_test_data
     )
 
     return generated_test_data

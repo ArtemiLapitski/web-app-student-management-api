@@ -1,21 +1,7 @@
 from random import choice, randint
 from string import ascii_uppercase, digits
-from copy import deepcopy
 from config import (STUDENTS_PER_GROUP_MIN, STUDENTS_PER_GROUP_MAX, COURSES_PER_STUDENT_MAX, COURSES_PER_STUDENT_MIN,
                     COURSES, NAMES, SURNAMES)
-
-# STUDENTS_PER_GROUP_MIN = 10
-# STUDENTS_PER_GROUP_MAX = 30
-# COURSES_PER_STUDENT_MIN = 1
-# COURSES_PER_STUDENT_MAX = 3
-#
-# COURSES = ['Physical Education', 'Science', 'Art', 'Mathematics', 'English', 'Music', 'Chemistry', 'Algebra', 'Physics',
-#            'Geography']
-# NAMES = ['Luca', 'Sasha', 'Amaya', 'Chace', 'Amiah', 'Essence', 'Shyann', 'Jackson', 'Jamar', 'Emanuel', 'Kristin',
-#          'Brenna', 'Gaige', 'Brianna', 'Quinn', 'Colten', 'Raphael', 'Keyon', 'Kennedi', 'Mackenzie']
-# SURNAMES = ['Schaefer', 'Sharp', 'Newton', 'Armstrong', 'Reynolds', 'Hamilton', 'Romero', 'Rush', 'Alvarez',
-#             'Williamson', 'Fletcher', 'Cannon', 'Blackwell', 'Mora', 'Ford', 'Lowe', 'Hutchinson', 'Pineda', 'Chaney',
-#             'Best']
 
 
 def generate_groups() -> list:

@@ -1,9 +1,8 @@
-# from docker.database import create_db, create_tables, add_test_data_to_db, get_session
-from app.database.setup import create_db, create_tables, add_test_data, get_session, get_table_object
+from app.database.setup import (create_db, create_tables, add_test_data, get_session, get_course_table,
+                                get_course_student_table, get_student_table, get_student_group_table, get_metadata_obj)
 from os import environ
 from config import CREATE_TABLES_FILE_PATH
-# to delete
-# from sqlalchemy import URL, create_engine, text
+
 from app.generate_test_data import generate_test_data
 
 SUPERUSER_USERNAME = environ['DB_SUPERUSER_USERNAME']
@@ -14,16 +13,6 @@ DB_NAME = environ['DB_NAME']
 ROLE = environ['DB_ROLE']
 PORT = int(environ['DB_PORT'])
 HOST = "host.docker.internal"
-
-# to delete
-# SUPERUSER_USERNAME='postgres'
-# SUPERUSER_PASSWORD='1996'
-# USERNAME='supervisor'
-# PASSWORD='supervisor'
-# DB_NAME='studentsdb'
-# ROLE='students_admin'
-# PORT=5432
-# HOST = 'localhost'
 
 
 if __name__ == "__main__":
@@ -38,12 +27,12 @@ if __name__ == "__main__":
 
     create_tables(engine, CREATE_TABLES_FILE_PATH)
 
-    # course_table, student_group_table, student_table, course_student_table = (
-    #     create_tables(engine, 'app/database/create_tables.sql'))
-    course_table = get_table_object(engine, 'course')
-    student_group_table = get_table_object(engine, 'student_group')
-    student_table = get_table_object(engine, 'student')
-    course_student_table = get_table_object(engine, 'course_student')
+    metadata_obj = get_metadata_obj(engine)
+
+    course_table = get_course_table(metadata_obj)
+    student_group_table = get_student_group_table(metadata_obj)
+    student_table = get_student_table(metadata_obj)
+    course_student_table = get_course_student_table(metadata_obj)
 
     generated_test_data = generate_test_data()
 
@@ -57,28 +46,3 @@ if __name__ == "__main__":
         course_student_table,
         **generated_test_data
     )
-
-
-
-    # add_and_retrieve_test_data(student_group_table,
-    #                            course_table,
-    #                            student_table,
-    #                            course_student_table,
-    #                            session)
-
-
-
-    # to delete
-    # superuser_url = URL.create(
-    #     "postgresql",
-    #     username=SUPERUSER_USERNAME,
-    #     password=SUPERUSER_PASSWORD,
-    #     host=HOST,
-    #     port=PORT
-    # )
-    # engine = create_engine(superuser_url)
-    # with engine.connect() as conn:
-    #     conn.execution_options(isolation_level="AUTOCOMMIT")
-    #     conn.execute(text(f"DROP DATABASE {DB_NAME} WITH (FORCE)"))
-    #     conn.execute(text(f"DROP USER {USERNAME}"))
-    #     conn.execute(text(f"DROP ROLE {ROLE}"))

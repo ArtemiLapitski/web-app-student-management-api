@@ -1,15 +1,7 @@
-from sqlalchemy import insert, select, MetaData, delete, create_engine, func, URL
-from sqlalchemy.orm import sessionmaker
-# from sqlalchemy.URL import create
+from sqlalchemy import insert, select, delete, create_engine, func, URL
 from config import DB_USERNAME, DB_PASSWORD, DB_HOST, DB_NAME, DB_PORT
-from app.database.setup import get_session, get_table_object
-# from app.database.tables import session, course_table, student_table, course_student_table, student_group_table
-# from app.database.tables import engine
-# from app.database.tables import user_db_url
-from app.database.setup import create_student_table, create_group_table
-
-
-# user_db_url = 'postgresql://supervisor_test:supervisor_test@localhost:5432/studentsdb_test'
+from app.database.setup import (get_session, get_course_table, get_student_group_table, get_student_table,
+                                get_course_student_table, get_metadata_obj)
 
 
 user_db_url = URL.create(
@@ -23,21 +15,14 @@ user_db_url = URL.create(
 
 engine = create_engine(user_db_url)
 
+metadata_obj = get_metadata_obj(engine)
+
+student_table = get_student_table(metadata_obj)
+student_group_table = get_student_group_table(metadata_obj)
+course_table = get_course_table(metadata_obj)
+course_student_table = get_course_student_table(metadata_obj)
+
 session = get_session(engine)
-
-
-metadata_obj = MetaData()
-metadata_obj.reflect(bind=engine)
-
-
-
-# student_table = metadata_obj.tables["student"]
-# student_group_table = metadata_obj.tables["student_group"]
-student_table = create_student_table(metadata_obj)
-student_group_table = create_group_table(metadata_obj)
-
-course_table = metadata_obj.tables["course"]
-course_student_table = metadata_obj.tables["course_student"]
 
 
 def add_student(first_name: str, last_name: str, courses: list, group: str = None):
@@ -50,7 +35,8 @@ def add_student(first_name: str, last_name: str, courses: list, group: str = Non
         ).inserted_primary_key[0]
 
         for course_name in courses:
-            course_id = session.scalars(select(course_table.c.course_id).where(course_table.c.course_name == course_name)).first()
+            course_id = session.scalars(select(course_table.c.course_id)
+                                        .where(course_table.c.course_name == course_name)).first()
             session.execute(insert(course_student_table).values(course_id=course_id, student_id=student_id))
 
         session.commit()
@@ -60,16 +46,16 @@ def add_student(first_name: str, last_name: str, courses: list, group: str = Non
 
 def get_student(student_id: int) -> dict:
     with session:
-        name_and_group_data = session.execute(select(student_table.c['first_name', 'last_name'],
-                                                     student_group_table.c.group_name)
-                                       .join(student_group_table,
-                                             student_group_table.c.group_id == student_table.c.group_id)
-                                       .where(student_table.c.student_id == student_id)).first()
+        name_and_group_data = session.execute(
+            select(student_table.c['first_name', 'last_name'], student_group_table.c.group_name)
+            .join(student_group_table, student_group_table.c.group_id == student_table.c.group_id)
+            .where(student_table.c.student_id == student_id)
+        ).first()
 
         courses_row = session.execute(select(course_table.c.course_name)
-                                  .join(course_student_table,
-                                        course_student_table.c.course_id == course_table.c.course_id)
-                                  .where(course_student_table.c.student_id == student_id))
+                                      .join(course_student_table,
+                                            course_student_table.c.course_id == course_table.c.course_id)
+                                      .where(course_student_table.c.student_id == student_id))
 
         courses = [course[0] for course in courses_row]
 
@@ -108,11 +94,12 @@ def get_groups_lte_student_count(students_count: int) -> list:
 
 def get_students_for_course(course_name: str) -> list:
     with session:
-        students_for_course = session.execute(select(student_table.c.first_name, student_table.c.last_name)
-                                              .join(course_student_table,
-                                                    course_student_table.c.student_id == student_table.c.student_id)
-                                              .join(course_table, course_student_table.c.course_id == course_table.c.course_id)
-                                              .where(course_table.c.course_name == course_name)).all()
+        students_for_course = session.execute(
+            select(student_table.c.first_name, student_table.c.last_name)
+            .join(course_student_table, course_student_table.c.student_id == student_table.c.student_id)
+            .join(course_table, course_student_table.c.course_id == course_table.c.course_id)
+            .where(course_table.c.course_name == course_name)
+        ).all()
 
     return [f"{first_name} {last_name}" for first_name, last_name in students_for_course]
 
@@ -139,7 +126,9 @@ def delete_student(student_id: int):
 
 def check_student_id(student_id: int):
     with session:
-        is_student = bool(session.execute(select(student_table.c.student_id).where(student_table.c.student_id == student_id)).all())
+        is_student = bool(session.execute(
+            select(student_table.c.student_id).where(student_table.c.student_id == student_id)
+        ).all())
 
     return is_student
 
