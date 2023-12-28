@@ -1,42 +1,20 @@
-from sqlalchemy import insert, select, delete, create_engine, func, URL
-from config import DB_USERNAME, DB_PASSWORD, DB_HOST, DB_NAME, DB_PORT
-from app.database.setup import (get_session, get_course_table, get_student_group_table, get_student_table,
-                                get_course_student_table, get_metadata_obj)
-
-
-user_db_url = URL.create(
-    "postgresql",
-    username=DB_USERNAME,
-    password=DB_PASSWORD,
-    host=DB_HOST,
-    port=DB_PORT,
-    database=DB_NAME
-)
-
-engine = create_engine(user_db_url)
-
-metadata_obj = get_metadata_obj(engine)
-
-student_table = get_student_table(metadata_obj)
-student_group_table = get_student_group_table(metadata_obj)
-course_table = get_course_table(metadata_obj)
-course_student_table = get_course_student_table(metadata_obj)
-
-session = get_session(engine)
+from sqlalchemy import insert, select, delete, func
+from app.database.connection import session
+from app.database.models import StudentModel, GroupModel, CourseModel, course_student_table
 
 
 def add_student(first_name: str, last_name: str, courses: list, group: str = None):
 
     with session:
         group_id = session.scalars(
-            select(student_group_table.c.group_id).where(student_group_table.c.group_name == group)).first()
+            select(GroupModel.group_id).where(GroupModel.group_name == group)).first()
         student_id = session.execute(
-            insert(student_table).values(group_id=group_id, first_name=first_name, last_name=last_name)
+            insert(StudentModel).values(group_id=group_id, first_name=first_name, last_name=last_name)
         ).inserted_primary_key[0]
 
         for course_name in courses:
-            course_id = session.scalars(select(course_table.c.course_id)
-                                        .where(course_table.c.course_name == course_name)).first()
+            course_id = session.scalars(select(CourseModel.course_id)
+                                        .where(CourseModel.course_name == course_name)).first()
             session.execute(insert(course_student_table).values(course_id=course_id, student_id=student_id))
 
         session.commit()
@@ -47,21 +25,21 @@ def add_student(first_name: str, last_name: str, courses: list, group: str = Non
 def get_student(student_id: int) -> dict:
     with session:
         name_and_group_data = session.execute(
-            select(student_table.c['first_name', 'last_name'], student_group_table.c.group_name)
-            .join(student_group_table, student_group_table.c.group_id == student_table.c.group_id)
-            .where(student_table.c.student_id == student_id)
+            select(StudentModel.first_name, StudentModel.last_name, GroupModel.group_name)
+            .join(GroupModel, GroupModel.group_id == StudentModel.group_id)
+            .where(StudentModel.student_id == student_id)
         ).first()
 
-        courses_row = session.execute(select(course_table.c.course_name)
+        courses_row = session.execute(select(CourseModel.course_name)
                                       .join(course_student_table,
-                                            course_student_table.c.course_id == course_table.c.course_id)
+                                            course_student_table.c.course_id == CourseModel.course_id)
                                       .where(course_student_table.c.student_id == student_id))
 
         courses = [course[0] for course in courses_row]
 
         if not name_and_group_data:
-            name_and_group_data = session.execute(select(student_table.c['first_name', 'last_name'])
-                                                  .where(student_table.c.student_id == student_id)).first()
+            name_and_group_data = session.execute(select(StudentModel.first_name, StudentModel.last_name,)
+                                                  .where(StudentModel.student_id == student_id)).first()
 
             student_data = {
                 'student_id': student_id,
@@ -83,22 +61,22 @@ def get_student(student_id: int) -> dict:
 
 
 def get_groups_lte_student_count(students_count: int) -> list:
-     with session:
-         groups = session.execute(select(student_group_table.c.group_name)
-                                  .join_from(student_table, student_group_table, isouter=True)
-                                  .group_by(student_group_table.c.group_name)
-                                  .having(func.count(student_table.c.student_id) <= students_count)
-                                  ).all()
-     return [group[0] if group[0] else "no_group" for group in groups]
+    with session:
+        groups = session.execute(select(GroupModel.group_name)
+                              .join_from(StudentModel, GroupModel, isouter=True)
+                              .group_by(GroupModel.group_name)
+                              .having(func.count(StudentModel.student_id) <= students_count)
+                              ).all()
+    return [group[0] if group[0] else "no_group" for group in groups]
 
 
 def get_students_for_course(course_name: str) -> list:
     with session:
         students_for_course = session.execute(
-            select(student_table.c.first_name, student_table.c.last_name)
-            .join(course_student_table, course_student_table.c.student_id == student_table.c.student_id)
-            .join(course_table, course_student_table.c.course_id == course_table.c.course_id)
-            .where(course_table.c.course_name == course_name)
+            select(StudentModel.first_name, StudentModel.last_name)
+            .join(course_student_table, course_student_table.c.student_id == StudentModel.student_id)
+            .join(CourseModel, course_student_table.c.course_id == CourseModel.course_id)
+            .where(CourseModel.course_name == course_name)
         ).all()
 
     return [f"{first_name} {last_name}" for first_name, last_name in students_for_course]
@@ -106,28 +84,28 @@ def get_students_for_course(course_name: str) -> list:
 
 def get_list_of_courses() -> list:
     with session:
-        all_courses = session.execute(select(course_table.c.course_name)).all()
+        all_courses = session.execute(select(CourseModel.course_name)).all()
 
     return [course_name[0] for course_name in all_courses]
 
 
 def get_list_of_groups() -> list:
     with session:
-        all_groups = session.execute(select(student_group_table.c.group_name)).all()
+        all_groups = session.execute(select(GroupModel.group_name)).all()
 
     return [group[0] for group in all_groups]
 
 
 def delete_student(student_id: int):
     with session:
-        session.execute(delete(student_table).where(student_table.c.student_id == student_id))
+        session.execute(delete(StudentModel).where(StudentModel.student_id == student_id))
         session.commit()
 
 
 def check_student_id(student_id: int):
     with session:
         is_student = bool(session.execute(
-            select(student_table.c.student_id).where(student_table.c.student_id == student_id)
+            select(StudentModel.student_id).where(StudentModel.student_id == student_id)
         ).all())
 
     return is_student
@@ -136,7 +114,7 @@ def check_student_id(student_id: int):
 def check_course_id(course_id: int):
     with session:
         is_course = bool(
-            session.execute(select(course_table.c.course_id).where(course_table.c.course_id == course_id)).all())
+            session.execute(select(CourseModel.course_id).where(CourseModel.course_id == course_id)).all())
     return is_course
 
 

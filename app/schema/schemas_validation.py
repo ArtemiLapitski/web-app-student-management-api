@@ -2,9 +2,9 @@
 from app.database.crud import (get_list_of_courses, get_list_of_groups, check_student_id, check_course_id,
                                check_course_for_student)
 
-
-all_courses = get_list_of_courses()
-all_groups = get_list_of_groups()
+#
+# all_courses = get_list_of_courses()
+# all_groups = get_list_of_groups()
 
 
 def student_count_validation(cls, v):
@@ -15,6 +15,7 @@ def student_count_validation(cls, v):
 
 
 def course_name_validation(cls, v):
+    all_courses = get_list_of_courses()
     if not v.replace(' ', '').isalpha():
         raise ValueError("Course name should not contain numbers or special characters")
     if v not in all_courses:
@@ -31,6 +32,7 @@ def name_validation(cls, v):
 
 
 def course_names_validation(cls, v):
+    all_courses = get_list_of_courses()
     for course_name in v:
         if course_name not in all_courses:
             raise ValueError(f"'{course_name}' course does not exist")
@@ -41,6 +43,7 @@ def course_names_validation(cls, v):
 
 
 def group_validation(cls, v):
+    all_groups = get_list_of_groups()
     if v != 'no_group' and v not in all_groups:
         raise ValueError(f"'{v}' group does not exist")
     else:

@@ -80,3 +80,20 @@ def generate_test_data():
             'courses_by_students': courses_by_students,
             'courses_and_group_by_students': courses_and_group_by_students
             }
+
+
+students = generate_students()
+groups = generate_groups()
+students_by_groups = assign_students_to_groups(students, groups)
+courses_by_students = assign_courses_to_students(students)
+courses_and_group_by_students = get_courses_and_group_by_students(courses_by_students, students_by_groups)
+print('students')
+print(students)
+print('groups')
+print(groups)
+print('students_by_groups')
+print(students_by_groups)
+print('courses_by_students')
+print(courses_by_students)
+print('courses_and_group_by_students')
+print(courses_and_group_by_students)

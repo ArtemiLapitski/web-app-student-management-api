@@ -1,6 +1,7 @@
-from sqlalchemy import URL, text, insert, select, create_engine, Table, MetaData
+from sqlalchemy import URL, text, insert, select, create_engine
 from sqlalchemy.orm import sessionmaker
 from config import COURSES
+from app.database.models import StudentModel, GroupModel, CourseModel, course_student_table
 
 
 def create_db(superuser_username: str,
@@ -69,82 +70,49 @@ def get_session(engine):
     return session
 
 
-def get_student_group_table(metadata_obj):
-    return metadata_obj.tables["student_group"]
-
-
-def get_student_table(metadata_obj):
-    return metadata_obj.tables["student"]
-
-
-def get_course_table(metadata_obj):
-    return metadata_obj.tables["course"]
-
-
-def get_course_student_table(metadata_obj):
-    return metadata_obj.tables["course_student"]
-
-
-def get_metadata_obj(engine):
-    metadata_obj = MetaData()
-    metadata_obj.reflect(bind=engine)
-    return metadata_obj
-
-
-def add_courses(courses_list: list, course_table: Table, session):
+def add_courses(courses_list: list, session):
     courses_list_of_dict = [{'course_name': course_name} for course_name in courses_list]
     with session:
-        session.execute(insert(course_table).values(courses_list_of_dict))
+        session.execute(insert(CourseModel).values(courses_list_of_dict))
         session.commit()
 
 
-def add_groups(groups: list, student_group_table: Table, session):
+def add_groups(groups: list, session):
     groups_list_of_dict = [{'group_name': group} for group in groups]
     with session:
-        session.execute(insert(student_group_table).values(groups_list_of_dict))
+        session.execute(insert(GroupModel).values(groups_list_of_dict))
         session.commit()
 
 
-def add_students(courses_and_group_by_students: dict,
-                 student_group_table: Table,
-                 student_table: Table,
-                 course_table: Table,
-                 course_student_table: Table,
-                 session):
+def add_students_and_course_student(courses_and_group_by_students: dict, session):
     with session:
         for student_name, data in courses_and_group_by_students.items():
             group = data['group']
             if group != 'no_group':
                 group_id = session.scalars(
-                    select(student_group_table.c.group_id).where(student_group_table.c.group_name == group)).first()
-                student_id = session.execute(insert(student_table).values(
+                    select(GroupModel.group_id).where(GroupModel.group_name == group)).first()
+                student_id = session.execute(insert(StudentModel).values(
                     group_id=group_id, first_name=student_name[1], last_name=student_name[2])).inserted_primary_key[0]
             else:
                 student_id = session.execute(
-                    insert(student_table)
+                    insert(StudentModel)
                     .values(first_name=student_name[1], last_name=student_name[2])).inserted_primary_key[0]
             for course_name in data['courses']:
                 course_id = session.scalars(
-                    select(course_table.c.course_id).where(course_table.c.course_name == course_name)).first()
+                    select(CourseModel.course_id).where(CourseModel.course_name == course_name)).first()
                 session.execute(insert(course_student_table).values(course_id=course_id, student_id=student_id))
         session.commit()
 
 
 def add_test_data(
     session,
-    student_group_table: Table,
-    course_table: Table,
-    student_table: Table,
-    course_student_table: Table,
     generated_groups: list,
     courses_and_group_by_students: dict,
     **kwargs
 ):
 
-    add_groups(generated_groups, student_group_table, session)
-    add_courses(COURSES, course_table, session)
-    add_students(courses_and_group_by_students, student_group_table, student_table, course_table, course_student_table,
-                 session)
-
+    add_groups(generated_groups, session)
+    add_courses(COURSES, session)
+    add_students_and_course_student(courses_and_group_by_students, session)
 
 
