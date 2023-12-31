@@ -1,5 +1,5 @@
-from sqlalchemy import Column, Integer, String, Text, ForeignKey, Table
-from sqlalchemy.orm import declarative_base
+from sqlalchemy import Column, Integer, String, Text, ForeignKey
+from sqlalchemy.orm import declarative_base, relationship
 
 Base = declarative_base()
 
@@ -28,9 +28,16 @@ class CourseModel(Base):
     description = Column(Text)
 
 
-course_student_table = Table(
-    "course_student",
-    Base.metadata,
-    Column("course_id", ForeignKey("course.course_id"), primary_key=True),
-    Column("student_id", ForeignKey("student.student_id"), primary_key=True),
-)
+# course_student_table = Table(
+#     "course_student",
+#     Base.metadata,
+#     Column("course_id", ForeignKey("course.course_id"), primary_key=True),
+#     Column("student_id", ForeignKey("student.student_id"), primary_key=True),
+# )
+class CourseStudentModel(Base):
+    __tablename__ = 'course_student'
+
+    course_id = Column(Integer, ForeignKey('course.course_id'), primary_key=True)
+    student_id = Column(Integer, ForeignKey('student.student_id'), primary_key=True)
+    # course = relationship("CourseModel", backref="student")
+    # student = relationship("StudentModel", backref="course")

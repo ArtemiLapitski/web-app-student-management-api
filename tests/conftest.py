@@ -2,7 +2,7 @@ from sqlalchemy import URL, create_engine, text
 from config import (DB_USERNAME, DB_PASSWORD, DB_ROLE, DB_NAME, DB_HOST, DB_SUPERUSER_PASSWORD,
                     DB_SUPERUSER_USERNAME, DB_PORT, CREATE_TABLES_SQL_FILE_PATH)
 from pytest import fixture
-from app.database.setup import (create_db, create_tables, add_test_data, get_session)
+from app.database.setup import (create_db, create_tables, add_data, get_session)
 from app.generate_test_data import generate_test_data
 from main import create_app, create_api
 from app.urls import add_urls
@@ -54,17 +54,14 @@ def generate_and_get_data():
 
 
 @fixture(scope='module')
-def add_data(setup_db, create_test_tables, generate_and_get_data):
+def add_test_data(setup_db, create_test_tables, generate_and_get_data):
     engine = setup_db
 
     session = get_session(engine)
 
-    generated_test_data = generate_and_get_data
+    data_by_student = generate_and_get_data['data_by_student']
 
-    add_test_data(
-        session,
-        **generated_test_data
-    )
+    add_data(session, data_by_student)
 
 
 @fixture()

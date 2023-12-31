@@ -23,7 +23,7 @@ class StudentToCreate(BaseModel):
     first_name: str
     last_name: str
     courses: list
-    group: Optional[str] = 'no_group'
+    group: Optional[str] = None
 
     validate_first_name = field_validator('first_name')(name_validation)
     validate_last_name = field_validator('last_name')(name_validation)
