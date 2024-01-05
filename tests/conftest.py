@@ -3,7 +3,7 @@ from config import (DB_USERNAME, DB_PASSWORD, DB_ROLE, DB_NAME, DB_HOST, DB_SUPE
                     DB_SUPERUSER_USERNAME, DB_PORT, CREATE_TABLES_SQL_FILE_PATH)
 from pytest import fixture
 from app.database.setup import (create_db, create_tables, add_data, get_session)
-from app.generate_test_data import generate_test_data
+from app.generate_data import generate_test_data
 from main import create_app, create_api
 from app.urls import add_urls
 
@@ -18,6 +18,8 @@ def setup_db(request):
                        DB_ROLE,
                        DB_PORT,
                        DB_HOST)
+
+    create_tables(engine, CREATE_TABLES_SQL_FILE_PATH)
 
     def teardown():
         superuser_url = URL.create(
@@ -39,29 +41,22 @@ def setup_db(request):
     return engine
 
 
-@fixture(scope='module')
-def create_test_tables(setup_db):
-
-    engine = setup_db
-
-    create_tables(engine, CREATE_TABLES_SQL_FILE_PATH)
+# @fixture(scope='module')
+# def create_test_tables(setup_db):
+#     engine = setup_db
+#     create_tables(engine, CREATE_TABLES_SQL_FILE_PATH)
 
 
 @fixture(scope='module')
-def generate_and_get_data():
-
+def get_test_data():
     return generate_test_data()
 
 
 @fixture(scope='module')
-def add_test_data(setup_db, create_test_tables, generate_and_get_data):
+def add_test_data(setup_db, get_test_data):
     engine = setup_db
-
     session = get_session(engine)
-
-    data_by_student = generate_and_get_data['data_by_student']
-
-    add_data(session, data_by_student)
+    add_data(session, **get_test_data)
 
 
 @fixture()

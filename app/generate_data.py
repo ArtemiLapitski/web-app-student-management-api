@@ -28,6 +28,10 @@ def generate_students() -> list:
     return students
 
 
+def get_courses() -> list:
+    return COURSES
+
+
 def assign_students_to_groups(students: list, groups: list) -> dict:
 
     students_copy = students.copy()
@@ -44,13 +48,13 @@ def assign_students_to_groups(students: list, groups: list) -> dict:
     return students_by_group
 
 
-def assign_courses_to_students(students: list) -> dict:
+def assign_courses_to_students(students: list, courses: list) -> dict:
 
     courses_by_student = {student: [] for student in students}
     for student in students:
         courses_amount = randint(COURSES_PER_STUDENT_MIN, COURSES_PER_STUDENT_MAX)
         while len(courses_by_student[student]) < courses_amount:
-            course = choice(COURSES)
+            course = choice(courses)
             if course not in courses_by_student[student]:
                 courses_by_student[student].append(course)
 
@@ -72,13 +76,15 @@ def get_data_by_student(courses_by_students: dict, students_by_groups: dict):
 def generate_test_data():
     generated_students = generate_students()
     generated_groups = generate_groups()
+    courses = get_courses()
 
     students_by_group = assign_students_to_groups(generated_students, generated_groups)
-    courses_by_student = assign_courses_to_students(generated_students)
+    courses_by_student = assign_courses_to_students(generated_students, courses)
     data_by_student = get_data_by_student(courses_by_student, students_by_group)
 
-    return {'generated_students': generated_students,
-            'generated_groups': generated_groups,
+    return {'students': generated_students,
+            'groups': generated_groups,
+            'courses': courses,
             'students_by_group': students_by_group,
             'courses_by_student': courses_by_student,
             'data_by_student': data_by_student

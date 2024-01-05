@@ -1,4 +1,4 @@
-from sqlalchemy import insert, select, delete, func
+from sqlalchemy import func
 from app.database.connection import session
 from app.database.models import StudentModel, GroupModel, CourseModel, CourseStudentModel
 
@@ -59,12 +59,6 @@ def get_student(student_id: int) -> dict:
 
 def get_groups_lte_student_count(students_count: int) -> list:
     with session:
-        # groups = session.execute(select(GroupModel.group_name)
-        #                       .join_from(StudentModel, GroupModel, isouter=True)
-        #                       .group_by(GroupModel.group_name)
-        #                       .having(func.count(StudentModel.student_id) <= students_count)
-        #                       ).all()
-
         groups = (session.query(GroupModel.group_name)
                   .join(StudentModel)
                   .having(func.count(StudentModel.student_id) <= students_count)
@@ -75,68 +69,33 @@ def get_groups_lte_student_count(students_count: int) -> list:
 
 def get_students_for_course(course_name: str) -> list:
     with session:
-        students_for_course = session.execute(
-            select(StudentModel.first_name, StudentModel.last_name)
-            .join(CourseStudentModel, CourseStudentModel.student_id == StudentModel.student_id)
-            .join(CourseModel, CourseStudentModel.course_id == CourseModel.course_id)
-            .where(CourseModel.course_name == course_name)
-        ).all()
+        students_for_course = (session.query(StudentModel.first_name, StudentModel.last_name)
+                               .join(CourseStudentModel, CourseStudentModel.student_id == StudentModel.student_id)
+                               .join(CourseModel, CourseStudentModel.course_id == CourseModel.course_id)
+                               .where(CourseModel.course_name == course_name)
+                               .all())
 
     return [f"{first_name} {last_name}" for first_name, last_name in students_for_course]
 
 
-def get_list_of_courses() -> list:
-    with session:
-        all_courses = session.execute(select(CourseModel.course_name)).all()
-
-    return [course_name[0] for course_name in all_courses]
-
-
-def get_list_of_groups() -> list:
-    with session:
-        all_groups = session.execute(select(GroupModel.group_name)).all()
-
-    return [group[0] for group in all_groups]
-
-
 def delete_student(student_id: int):
     with session:
-        session.execute(delete(StudentModel).where(StudentModel.student_id == student_id))
+        student = session.query(StudentModel).filter_by(student_id=student_id).first()
+        session.delete(student)
         session.commit()
-
-
-def check_student_id(student_id: int):
-    with session:
-        is_student = bool(session.execute(
-            select(StudentModel.student_id).where(StudentModel.student_id == student_id)
-        ).all())
-
-    return is_student
-
-
-def check_course_id(course_id: int):
-    with session:
-        is_course = bool(
-            session.execute(select(CourseModel.course_id).where(CourseModel.course_id == course_id)).all())
-    return is_course
-
-
-def check_course_for_student(student_id: int, course_id: int):
-    with session:
-        courses_for_student = session.execute(select(CourseStudentModel.course_id)
-                                              .where(CourseStudentModel.student_id == student_id)).all()
-    return course_id in [course_id[0] for course_id in courses_for_student]
 
 
 def add_course_to_student(student_id: int, course_id: int):
     with session:
-        session.execute(insert(CourseStudentModel).values(course_id=course_id, student_id=student_id))
+        session.add(CourseStudentModel(course_id=course_id, student_id=student_id))
         session.commit()
 
 
 def delete_student_from_course(student_id: int, course_id: int):
     with session:
-        session.execute(delete(CourseStudentModel)
-                        .where(CourseStudentModel.student_id == student_id)
-                        .where(CourseStudentModel.course_id == course_id))
+        instance = (session.query(CourseStudentModel)
+                    .where(CourseStudentModel.student_id == student_id)
+                    .where(CourseStudentModel.course_id == course_id)
+                    .first())
+        session.delete(instance)
         session.commit()

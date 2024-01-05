@@ -1,10 +1,5 @@
-# from app import COURSES
-from app.database.crud import (get_list_of_courses, get_list_of_groups, check_student_id, check_course_id,
-                               check_course_for_student)
-
-#
-# all_courses = get_list_of_courses()
-# all_groups = get_list_of_groups()
+from app.database.validation import (get_list_of_courses, get_list_of_groups, check_student_id, check_course_id,
+                                     check_course_for_student)
 
 
 def student_count_validation(cls, v):

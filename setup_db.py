@@ -1,7 +1,7 @@
 from app.database.setup import (create_db, create_tables, add_data, get_session)
 from os import environ
 from config import CREATE_TABLES_SQL_FILE_PATH
-from app.generate_test_data import generate_test_data
+from app.generate_data import generate_test_data
 
 DB_SUPERUSER_USERNAME = environ['DB_SUPERUSER_USERNAME']
 DB_SUPERUSER_PASSWORD = environ['DB_SUPERUSER_PASSWORD']
@@ -29,15 +29,13 @@ if __name__ == "__main__":
     session = get_session(engine)
 
     generated_test_data = generate_test_data()
-#
-#
-#
-#     # add_test_data(
-#     #     session,
-#     #     **generated_test_data
-#     # )
-#
-    add_data(session, generated_test_data['data_by_student'])
+
+    add_data(session, **generated_test_data)
+
+
+
+
+    # add_data(session, generated_test_data['data_by_student'])
 #
 #
 # from sqlalchemy import URL, create_engine, text
