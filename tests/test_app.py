@@ -1,78 +1,90 @@
 import json
+from tests.mocks import students_for_physics_mocked, groups_with_student_count_lte_15_mocked
+
+# class Groups(Resource):
+#     def get(self):
+#
+# class Students(Resource):
+#     def get(self):
+#     def post(self):
+#     def delete(self, student_id):
+#
+# class StudentsCourses(Resource):
+#     def put(self, student_id, course_id):
+#     def delete(self, student_id, course_id):
 
 
-student_count_lte = 15
-course = 'Physics'
+def test_groups(client, setup_db):
+    groups_with_student_count_lte_15 = client.get('groups', query_string={'student_count_lte': 15})
+    groups_with_student_count_lte_15 = json.loads(groups_with_student_count_lte_15.data)
+    assert groups_with_student_count_lte_15 == groups_with_student_count_lte_15_mocked
 
 
-def test_groups(client, setup_db, get_test_data, add_test_data):
-
-    response = client.get('groups', query_string={'student_count_lte': student_count_lte})
-    actual = json.loads(response.data)
-
-    students_by_group = get_test_data['students_by_group']
-    groups_with_lte_student_count = [group for group, students in students_by_group.items()
-                                     if (len(students) <= student_count_lte) and (group != 'no_group')]
-
-    assert set(actual) == set(groups_with_lte_student_count)
+def test_students_for_course(client, setup_db):
+    students_for_course = client.get('students', query_string={'course': 'Physics'})
+    students_for_course = json.loads(students_for_course.data)
+    assert students_for_course == students_for_physics_mocked
 
 
-def test_courses_by_students(client, setup_db, get_test_data, add_test_data):
-
-    response = client.get('students', query_string={'course': course})
-    actual = json.loads(response.data)
-
-    courses_by_student = get_test_data['courses_by_student']
-    students_for_course = [' '.join([student[1], student[2]])
-                           for student, courses in courses_by_student.items() if course in courses]
-
-    assert set(actual) == set(students_for_course)
+create_new_student_response = {'student_id': 201,
+                               'first_name': 'George',
+                               'last_name': 'Washington',
+                               'group': None,
+                               'courses': ['Science', 'Art', 'Physics']
+                               }
 
 
-groups_mock = ['ZF-86', 'FD-64']
+def test_add_student(client, setup_db):
 
-courses_mock = ['Physical Education',
-           'Science',
-           'Art',
-           'Mathematics',
-           'English',
-           'Music',
-           'Chemistry',
-           'Algebra',
-           'Physics',
-           'Geography']
+    data = {"first_name": "George", "last_name": "Washington", "courses": ["Art", "Science", "Physics"]}
+    response = client.post('students', content_type='application/json', data=json.dumps(data))
+    response = json.loads(response.data)
+    assert response == create_new_student_response
 
-students_mock = [(1, 'Jackson', 'Mora'), (2, 'Luca', 'Rush'), (3, 'Amaya', 'Schaefer')]
-
-data_by_student_mock = {(1, 'Jackson', 'Mora'): {
-                                 'courses': ['Art'],
-                                 'group': 'ZF-86'},
-                            (2, 'Luca', 'Rush'): {
-                                'courses': ['Chemistry', 'Art', 'English'],
-                                'group': 'FD-64'},
-                            (3, 'Amaya', 'Schaefer'): {
-                                'courses': ['Geography', 'Algebra'],
-                                'group': 'no_group'}
-                            }
+    students_for_course = client.get('students', query_string={'course': 'Physics'})
+    students_for_course = json.loads(students_for_course.data)
+    students_for_physics_mocked.append("George Washington")
+    assert students_for_course == students_for_physics_mocked
 
 
-def test_add_course_to_student(client, setup_db, get_test_data, add_test_data, mocker):
-    mocker.patch('app.generate_data.get_courses', return_value=courses_mock)
-    mocker.patch('app.generate_data.generate_students', return_value=students_mock)
-    mocker.patch('app.generate_data.generate_groups', return_value=groups_mock)
-    mocker.patch('app.generate_data.get_data_by_student', return_value=data_by_student_mock)
+def test_delete_student(client, setup_db):
 
-    response = client.get('students', query_string={'course': course})
-    actual = json.loads(response.data)
-    print(actual)
+    students_for_course = client.get('students', query_string={'course': 'Physics'})
+    students_for_course = json.loads(students_for_course.data)
+    assert "Chace Blackwell" in students_for_course
 
-    # response = client.post('students/3/courses/4', query_string={'course': course})
-    #
-    # actual = json.loads(response.data)
-    #
-    # courses_by_student = get_test_data['courses_by_student']
-    #
-    # students_for_course = [' '.join([student[1], student[2]])
-    #                        for student, courses in courses_by_student.items() if course in courses]
-    #
-    # assert set(actual) == set(students_for_course)
+    response = client.delete('students/1')
+    response = json.loads(response.data)
+    assert response == {'mssg': 'Student with student_id=1 id has been deleted'}
+
+    students_for_course = client.get('students', query_string={'course': 'Physics'})
+    students_for_course = json.loads(students_for_course.data)
+    assert "Chace Blackwell" not in students_for_course
+
+
+add_course_to_student_response = {'student_id': '2',
+                                  'first_name': 'Kennedi',
+                                  'last_name': 'Blackwell',
+                                  'group': None,
+                                  'courses': ['Music', 'Physics']}
+
+
+def test_add_course_to_student(client, setup_db):
+    response = client.put('students/2/courses/9')
+    assert json.loads(response.data) == add_course_to_student_response
+    students_for_physics_mocked.append('Kennedi Blackwell')
+
+    students_for_course = client.get('students', query_string={'course': 'Physics'})
+    students_for_course = json.loads(students_for_course.data)
+
+    assert students_for_course == students_for_physics_mocked
+
+
+def test_delete_student_from_course(client, setup_db):
+    client.delete('students/1/courses/9')
+    students_for_physics_mocked.remove('Chace Blackwell')
+
+    students_for_course = client.get('students', query_string={'course': 'Physics'})
+    students_for_course = json.loads(students_for_course.data)
+
+    assert students_for_course == students_for_physics_mocked

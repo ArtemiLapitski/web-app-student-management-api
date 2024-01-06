@@ -1,7 +1,7 @@
 from random import choice, randint
 from string import ascii_uppercase, digits
 from config import (STUDENTS_PER_GROUP_MIN, STUDENTS_PER_GROUP_MAX, COURSES_PER_STUDENT_MAX, COURSES_PER_STUDENT_MIN,
-                    COURSES, NAMES, SURNAMES)
+                    COURSES, NAMES, SURNAMES, NUMBER_OF_STUDENTS)
 
 
 def generate_groups() -> list:
@@ -23,7 +23,7 @@ def generate_groups() -> list:
 
 def generate_students() -> list:
 
-    students = [(i, choice(NAMES), choice(SURNAMES)) for i, _ in enumerate(range(200), start=1)]
+    students = [(i, choice(NAMES), choice(SURNAMES)) for i, _ in enumerate(range(NUMBER_OF_STUDENTS), start=1)]
 
     return students
 
@@ -91,18 +91,21 @@ def generate_test_data():
             }
 
 
-# students = generate_students()
-# groups = generate_groups()
-# students_by_groups = assign_students_to_groups(students, groups)
-# courses_by_students = assign_courses_to_students(students)
-# courses_and_group_by_students = get_courses_and_group_by_students(courses_by_students, students_by_groups)
-# print('students')
-# print(students)
-# print('groups')
-# print(groups)
-# print('students_by_groups')
-# print(students_by_groups)
-# print('courses_by_students')
-# print(courses_by_students)
-# print('courses_and_group_by_students')
-# print(courses_and_group_by_students)
+courses = get_courses()
+students = generate_students()
+groups = generate_groups()
+students_by_groups = assign_students_to_groups(students, groups)
+courses_by_students = assign_courses_to_students(students, courses)
+courses_and_group_by_students = get_data_by_student(courses_by_students, students_by_groups)
+print('students')
+print(students)
+print('groups')
+print(groups)
+print('courses')
+print(courses)
+print('students_by_groups')
+print(students_by_groups)
+print('courses_by_students')
+print(courses_by_students)
+print('courses_and_group_by_students')
+print(courses_and_group_by_students)

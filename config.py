@@ -24,6 +24,8 @@ STUDENTS_PER_GROUP_MAX = 30
 COURSES_PER_STUDENT_MIN = 1
 COURSES_PER_STUDENT_MAX = 3
 
+NUMBER_OF_STUDENTS = 200
+
 COURSES = ['Physical Education', 'Science', 'Art', 'Mathematics', 'English', 'Music', 'Chemistry', 'Algebra', 'Physics',
            'Geography']
 NAMES = ['Luca', 'Sasha', 'Amaya', 'Chace', 'Amiah', 'Essence', 'Shyann', 'Jackson', 'Jamar', 'Emanuel', 'Kristin',

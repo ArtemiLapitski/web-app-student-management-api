@@ -6,9 +6,10 @@ from app.database.setup import (create_db, create_tables, add_data, get_session)
 from app.generate_data import generate_test_data
 from main import create_app, create_api
 from app.urls import add_urls
+from tests.mocks import groups_mock, courses_mock, data_by_student_mock
 
 
-@fixture(scope='module')
+@fixture(scope='function')
 def setup_db(request):
     engine = create_db(DB_SUPERUSER_USERNAME,
                        DB_SUPERUSER_PASSWORD,
@@ -20,6 +21,9 @@ def setup_db(request):
                        DB_HOST)
 
     create_tables(engine, CREATE_TABLES_SQL_FILE_PATH)
+
+    session = get_session(engine)
+    add_data(session, groups=groups_mock, courses=courses_mock, data_by_student=data_by_student_mock)
 
     def teardown():
         superuser_url = URL.create(
@@ -38,7 +42,7 @@ def setup_db(request):
 
     request.addfinalizer(teardown)
 
-    return engine
+    # return engine
 
 
 # @fixture(scope='module')
@@ -47,17 +51,24 @@ def setup_db(request):
 #     create_tables(engine, CREATE_TABLES_SQL_FILE_PATH)
 
 
-@fixture(scope='module')
-def get_test_data():
-    return generate_test_data()
+# @fixture(scope='module')
+# def get_test_data():
+#     return generate_test_data()
+#
+#
+# @fixture(scope='module')
+# def add_test_data(setup_db, get_test_data):
+#     engine = setup_db
+#     session = get_session(engine)
+#     add_data(session, **get_test_data)
 
 
-@fixture(scope='module')
-def add_test_data(setup_db, get_test_data):
-    engine = setup_db
-    session = get_session(engine)
-    add_data(session, **get_test_data)
-
+# @fixture(scope='module')
+# def add_mocked_data(setup_db):
+#     engine = setup_db
+#     session = get_session(engine)
+#     add_data(session, groups=groups_mock, courses=courses_mock, data_by_student=data_by_students_mock)
+#
 
 @fixture()
 def app():
