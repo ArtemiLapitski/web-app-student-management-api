@@ -48,7 +48,6 @@ def db_setup(request):
 @fixture(scope='function')
 def db_session(db_setup, request):
     session = get_session(db_setup)
-    # add_data(session, groups=groups_mock, courses=courses_mock, data_by_student=data_by_student_mock)
 
     def rollback():
         session.rollback()
@@ -58,6 +57,16 @@ def db_session(db_setup, request):
 
     return session
 
+
+# @fixture(scope='function')
+# def db_session(db_setup, request):
+#     session = get_session(db_setup)
+#
+#
+#     yield session
+#
+#     session.rollback()
+#     session.close()
 
 
 # @fixture(scope='module')
