@@ -1,4 +1,5 @@
 from sqlalchemy import URL, create_engine, text
+from sqlalchemy.orm import Session
 from config import (DB_USERNAME, DB_PASSWORD, DB_ROLE, DB_NAME, DB_HOST, DB_SUPERUSER_PASSWORD,
                     DB_SUPERUSER_USERNAME, DB_PORT, CREATE_TABLES_SQL_FILE_PATH)
 from pytest import fixture
@@ -9,8 +10,8 @@ from app.urls import add_urls
 from tests.mocks import groups_mock, courses_mock, data_by_student_mock
 
 
-@fixture(scope='function')
-def setup_db(request):
+@fixture(scope='session')
+def db_setup(request):
     engine = create_db(DB_SUPERUSER_USERNAME,
                        DB_SUPERUSER_PASSWORD,
                        DB_USERNAME,
@@ -21,9 +22,8 @@ def setup_db(request):
                        DB_HOST)
 
     create_tables(engine, CREATE_TABLES_SQL_FILE_PATH)
-
-    session = get_session(engine)
-    add_data(session, groups=groups_mock, courses=courses_mock, data_by_student=data_by_student_mock)
+    with Session(engine) as session:
+        add_data(session, groups=groups_mock, courses=courses_mock, data_by_student=data_by_student_mock)
 
     def teardown():
         superuser_url = URL.create(
@@ -42,13 +42,22 @@ def setup_db(request):
 
     request.addfinalizer(teardown)
 
-    # return engine
+    return engine
 
 
-# @fixture(scope='module')
-# def create_test_tables(setup_db):
-#     engine = setup_db
-#     create_tables(engine, CREATE_TABLES_SQL_FILE_PATH)
+@fixture(scope='function')
+def db_session(db_setup, request):
+    session = get_session(db_setup)
+    # add_data(session, groups=groups_mock, courses=courses_mock, data_by_student=data_by_student_mock)
+
+    def rollback():
+        session.rollback()
+        session.close()
+
+    request.addfinalizer(rollback)
+
+    return session
+
 
 
 # @fixture(scope='module')
