@@ -1,4 +1,5 @@
 from sqlalchemy import create_engine, URL
+from sqlalchemy.orm import sessionmaker
 from config import (DB_USERNAME, DB_PASSWORD, DB_HOST, DB_NAME, DB_PORT)
 from app.database.setup import get_session
 
@@ -13,8 +14,10 @@ db_url = URL.create(
 )
 
 engine = create_engine(db_url)
-
-session = get_session(engine)
+# print(engine)
+Session = sessionmaker(engine)
+session = Session()
+# session = get_session(engine)
 
 # #
 # from app.database.models import GroupModel, StudentModel, CourseStudentModel, CourseModel

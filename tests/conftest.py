@@ -8,11 +8,12 @@ from app.generate_data import generate_test_data
 from main import create_app, create_api
 from app.urls import add_urls
 from tests.mocks import groups_mock, courses_mock, data_by_student_mock
+# from app.database.connection import engine
 
 
 @fixture(scope='session')
 def db_setup(request):
-    engine = create_db(DB_SUPERUSER_USERNAME,
+    db_engine = create_db(DB_SUPERUSER_USERNAME,
                        DB_SUPERUSER_PASSWORD,
                        DB_USERNAME,
                        DB_PASSWORD,
@@ -21,9 +22,10 @@ def db_setup(request):
                        DB_PORT,
                        DB_HOST)
 
-    create_tables(engine, CREATE_TABLES_SQL_FILE_PATH)
-    with Session(engine) as session:
-        add_data(session, groups=groups_mock, courses=courses_mock, data_by_student=data_by_student_mock)
+    create_tables(db_engine, CREATE_TABLES_SQL_FILE_PATH)
+    db_session = get_session(db_engine)
+    with db_session:
+        add_data(db_session, groups=groups_mock, courses=courses_mock, data_by_student=data_by_student_mock)
 
     def teardown():
         superuser_url = URL.create(
@@ -42,20 +44,61 @@ def db_setup(request):
 
     request.addfinalizer(teardown)
 
-    return engine
+    return db_engine
 
 
 @fixture(scope='function')
-def db_session(db_setup, request):
-    session = get_session(db_setup)
+def db_session(db_setup):
+    """Returns an sqlalchemy session, and after the test tears down everything properly."""
+    connection = db_setup.connect()
+    # begin the nested transaction
+    transaction = connection.begin()
+    # use the connection with the already started transaction
+    session = Session(bind=connection)
 
-    def rollback():
-        session.rollback()
-        session.close()
+    yield session
 
-    request.addfinalizer(rollback)
+    session.close()
+    # roll back the broader transaction
+    transaction.rollback()
+    # put back the connection to the connection pool
+    connection.close()
 
-    return session
+    # def rollback():
+    #     session.close()
+    #     transaction.rollback()
+    #     connection.close()
+    #
+    # request.addfinalizer(rollback)
+    #
+    # return session
+
+
+
+# @fixture(scope='function')
+# def db_session(request):
+#
+#     def rollback():
+#         session.rollback()
+#         session.close()
+#
+#     request.addfinalizer(rollback)
+#
+#     return session
+
+
+
+# @fixture(scope='function')
+# def db_session(db_setup, request):
+#     session = get_session(db_setup)
+#
+#     def rollback():
+#         session.rollback()
+#         session.close()
+#
+#     request.addfinalizer(rollback)
+#
+#     return session
 
 
 # @fixture(scope='function')

@@ -9,8 +9,8 @@ def test_1(client, db_setup, db_session):
 
 
 def test_2(client, db_setup, db_session):
-    # with db_session:
-    client.put('students/2/courses/9')
+    with db_session:
+        client.put('students/2/courses/9')
 
 
 def test_3(client, db_setup, db_session):
