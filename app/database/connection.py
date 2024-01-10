@@ -1,5 +1,4 @@
 from sqlalchemy import create_engine, URL
-from sqlalchemy.orm import sessionmaker
 from config import (DB_USERNAME, DB_PASSWORD, DB_HOST, DB_NAME, DB_PORT)
 from app.database.setup import get_session
 
@@ -14,19 +13,8 @@ db_url = URL.create(
 )
 
 engine = create_engine(db_url)
-# print(engine)
-Session = sessionmaker(engine)
-session = Session()
-# session = get_session(engine)
 
-# #
-# from app.database.models import GroupModel, StudentModel, CourseStudentModel, CourseModel
+session = get_session(engine)
 
-# # # create worked, how to delete and if it cascades?
-# instance = session.query(StudentModel).filter_by(student_id=1).first()
-# # # student = StudentModel(student_id=1)
-# session.delete(instance)
-# session.delete(StudentModel)
-# #
-# session.commit()
+
 
