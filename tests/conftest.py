@@ -1,16 +1,16 @@
 from sqlalchemy import URL, create_engine, text
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import Session
 from config import (DB_USERNAME, DB_PASSWORD, DB_ROLE, DB_NAME, DB_HOST, DB_SUPERUSER_PASSWORD,
                     DB_SUPERUSER_USERNAME, DB_PORT, CREATE_TABLES_SQL_FILE_PATH)
-from pytest import fixture
 from app.database.setup import (create_db, create_tables, add_data, get_session)
 from main import create_app, create_api
 from app.urls import add_urls
 from tests.mocks import groups_mock, courses_mock, data_by_student_mock
+import pytest
+from sqlalchemy_utils import drop_database
 
 
-
-@fixture(scope='session')
+@pytest.fixture(scope='session')
 def db_setup(request):
     db_engine = create_db(DB_SUPERUSER_USERNAME,
                        DB_SUPERUSER_PASSWORD,
@@ -45,42 +45,31 @@ def db_setup(request):
 
     return db_engine
 
+    # yield db_engine
+    # drop_database(f'postgresql://{"postgres"}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}')
 
-@fixture(scope='function')
+
+@pytest.fixture(scope='function')
 def db_session(db_setup):
     """Returns an sqlalchemy session, and after the test tears down everything properly."""
     connection = db_setup.connect()
     # begin the nested transaction
     transaction = connection.begin()
     # use the connection with the already started transaction
-    Session = sessionmaker()
     session = Session(bind=connection)
 
     yield session
-
-    session.close()
-    # roll back the broader transaction
-    transaction.rollback()
-    # put back the connection to the connection pool
+    session.rollback()
     connection.close()
 
-    # def rollback():
-    #     session.close()
-    #     transaction.rollback()
-    #     connection.close()
-    #
-    # request.addfinalizer(rollback)
-    #
-    # return session
 
-
-@fixture()
+@pytest.fixture()
 def app():
     app = create_app()
     return app
 
 
-@fixture()
+@pytest.fixture()
 def client(app):
     api = create_api(app)
     add_urls(api)

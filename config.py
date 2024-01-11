@@ -13,7 +13,8 @@ DB_PASSWORD = environ.get("DB_PASSWORD")
 DB_NAME = environ.get("DB_NAME")
 DB_PORT = int(environ.get("DB_PORT"))
 DB_ROLE = environ.get("DB_ROLE")
-DB_HOST = 'localhost'
+# DB_HOST = 'localhost'
+DB_HOST = environ.get("DB_HOST")
 
 
 WORKING_DIR = path.dirname(__file__)
