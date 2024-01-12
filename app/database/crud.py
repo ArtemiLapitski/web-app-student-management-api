@@ -68,6 +68,8 @@ def get_groups_lte_student_count(students_count: int) -> list:
 
 
 def get_students_for_course(course_name: str) -> list:
+    # session123 = session
+    # print(session123)
     with session:
         students_for_course = (session.query(StudentModel.first_name, StudentModel.last_name)
                                .join(CourseStudentModel, CourseStudentModel.student_id == StudentModel.student_id)

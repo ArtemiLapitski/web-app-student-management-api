@@ -102,9 +102,9 @@ def db_engine():
 def db(db_engine):
     connection = db_engine.connect()
     transaction = connection.begin()
-    db = Session(bind=connection)
-    yield db
-    db.rollback()
+    session = Session(bind=connection)
+    yield session
+    session.rollback()
     connection.close()
 
 
