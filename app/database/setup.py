@@ -3,7 +3,7 @@ from sqlalchemy.orm import sessionmaker
 from app.database.models import StudentModel, GroupModel, CourseModel, CourseStudentModel
 
 
-def create_db(superuser_username: str,
+def create_db_and_user(superuser_username: str,
               superuser_password: str,
               username: str,
               password: str,
@@ -27,7 +27,7 @@ def create_db(superuser_username: str,
         conn.execute(text(f"CREATE USER {username} PASSWORD '{password}'"))
         conn.execute(text(f"GRANT {role} TO {username}"))
 
-    superuser_db_url = URL.create(
+    db_superuser_url = URL.create(
         "postgresql",
         username=superuser_username,
         password=superuser_password,
@@ -35,22 +35,22 @@ def create_db(superuser_username: str,
         port=port,
         database=db_name
     )
-    engine = create_engine(superuser_db_url)
+    engine = create_engine(db_superuser_url)
     with engine.connect() as conn:
         conn.execute(text(f"GRANT ALL ON SCHEMA public TO {role}"))
         conn.commit()
 
-    user_db_url = URL.create(
-        "postgresql",
-        username=username,
-        password=password,
-        host=host,
-        port=port,
-        database=db_name
-    )
-    engine = create_engine(user_db_url)
-
-    return engine
+    # db_user_url = URL.create(
+    #     "postgresql",
+    #     username=username,
+    #     password=password,
+    #     host=host,
+    #     port=port,
+    #     database=db_name
+    # )
+    # engine = create_engine(db_user_url)
+    #
+    # return engine
 
 
 def create_tables(engine, sql_file_path: str):

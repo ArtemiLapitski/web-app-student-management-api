@@ -4,7 +4,6 @@ from .schemas_validation import (student_count_validation, course_name_validatio
                                  course_id_validation, no_course_for_student_validation,
                                  course_exists_for_student_validation)
 from typing import Optional
-# from app import check_course_for_student
 
 
 class StudentCountToValidate(BaseModel):
@@ -54,15 +53,4 @@ class CourseToDelete(BaseModel):
     validate_course_id = field_validator('course_id')(course_id_validation)
     validate_course_exists_for_student = model_validator(mode='after')(course_exists_for_student_validation)
 
-
-    # @model_validator(mode='after')
-    # def validate_course_for_student(self):
-    #     student_id = self.student_id
-    #     course_id = self.course_id
-    #     # if course_id != student_id:
-    #     #     raise ValueError(f"This course is already assigned to student")
-    #
-    #     is_course_for_student = check_course_for_student(student_id, course_id)
-    #     if is_course_for_student:
-    #         raise ValueError(f"This course is already assigned to student")
 

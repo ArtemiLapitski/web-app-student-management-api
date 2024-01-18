@@ -1,12 +1,17 @@
 from flask import Flask
 from flask_restful import Api
 from app.urls import add_urls
-from config import SECRET_KEY
+from config import SECRET_KEY, DB_URL
+from app.database.models import db
 
 
 def create_app():
     app = Flask(__name__)
+    app.config['SQLALCHEMY_DATABASE_URI'] = DB_URL
+    # app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SECRET_KEY'] = SECRET_KEY
+    db.init_app(app)
+
     return app
 
 
@@ -20,3 +25,11 @@ if __name__ == '__main__':
     api = create_api(app)
     add_urls(api)
     app.run(debug=True)
+
+# result = db.session.query(GroupModel.group_name).all()
+# print(result)
+
+
+
+
+

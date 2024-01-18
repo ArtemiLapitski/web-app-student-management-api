@@ -1,43 +1,34 @@
-from sqlalchemy import Column, Integer, String, Text, ForeignKey
-from sqlalchemy.orm import declarative_base, relationship
+from flask_sqlalchemy import SQLAlchemy
 
-Base = declarative_base()
+db = SQLAlchemy()
 
 
-class GroupModel(Base):
+class GroupModel(db.Model):
     __tablename__ = 'student_group'
 
-    group_id = Column(Integer, primary_key=True)
-    group_name = Column(String(5), nullable=False, unique=True)
+    group_id = db.Column(db.Integer, primary_key=True)
+    group_name = db.Column(db.String(5), nullable=False, unique=True)
 
 
-class StudentModel(Base):
+class StudentModel(db.Model):
     __tablename__ = 'student'
 
-    student_id = Column(Integer, primary_key=True)
-    group_id = Column(ForeignKey('student_group.group_id'))
-    first_name = Column(String(50), nullable=False)
-    last_name = Column(String(50), nullable=False)
+    student_id = db.Column(db.Integer, primary_key=True)
+    group_id = db.Column(db.ForeignKey('student_group.group_id'))
+    first_name = db.Column(db.String(50), nullable=False)
+    last_name = db.Column(db.String(50), nullable=False)
 
 
-class CourseModel(Base):
+class CourseModel(db.Model):
     __tablename__ = 'course'
 
-    course_id = Column(Integer, primary_key=True)
-    course_name = Column(String(50), nullable=False, unique=True)
-    description = Column(Text)
+    course_id = db.Column(db.Integer, primary_key=True)
+    course_name = db.Column(db.String(50), nullable=False, unique=True)
+    description = db.Column(db.Text)
 
 
-# course_student_table = Table(
-#     "course_student",
-#     Base.metadata,
-#     Column("course_id", ForeignKey("course.course_id"), primary_key=True),
-#     Column("student_id", ForeignKey("student.student_id"), primary_key=True),
-# )
-class CourseStudentModel(Base):
+class CourseStudentModel(db.Model):
     __tablename__ = 'course_student'
 
-    course_id = Column(Integer, ForeignKey('course.course_id'), primary_key=True)
-    student_id = Column(Integer, ForeignKey('student.student_id'), primary_key=True)
-    # course = relationship("CourseModel", backref="student")
-    # student = relationship("StudentModel", backref="course")
+    course_id = db.Column(db.Integer, db.ForeignKey('course.course_id'), primary_key=True)
+    student_id = db.Column(db.Integer, db.ForeignKey('student.student_id'), primary_key=True)

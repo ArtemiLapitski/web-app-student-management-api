@@ -16,6 +16,7 @@ DB_ROLE = environ.get("DB_ROLE")
 # DB_HOST = 'localhost'
 DB_HOST = environ.get("DB_HOST")
 
+DB_URL = f'postgresql://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
 
 WORKING_DIR = path.dirname(__file__)
 CREATE_TABLES_SQL_FILE_PATH = path.join(WORKING_DIR, 'app', 'database', 'create_tables.sql')

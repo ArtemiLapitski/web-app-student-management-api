@@ -1,8 +1,10 @@
-from app.database.setup import (create_db, create_tables, add_data, get_session)
+from app.database.setup import (create_db_and_user, create_tables, add_data, get_session)
 from os import environ
-from config import CREATE_TABLES_SQL_FILE_PATH
+from config import CREATE_TABLES_SQL_FILE_PATH, DB_URL
 from app.generate_data import generate_test_data
+from sqlalchemy import create_engine
 
+# to delete
 DB_SUPERUSER_USERNAME = environ['DB_SUPERUSER_USERNAME']
 DB_SUPERUSER_PASSWORD = environ['DB_SUPERUSER_PASSWORD']
 DB_USERNAME = environ['DB_USERNAME']
@@ -14,8 +16,9 @@ DB_PORT = int(environ['DB_PORT'])
 # DB_HOST = "host.docker.internal"
 DB_HOST = 'localhost'
 
+
 if __name__ == "__main__":
-    engine = create_db(superuser_username=DB_SUPERUSER_USERNAME,
+    create_db_and_user(superuser_username=DB_SUPERUSER_USERNAME,
                        superuser_password=DB_SUPERUSER_PASSWORD,
                        username=DB_USERNAME,
                        password=DB_PASSWORD,
@@ -24,6 +27,8 @@ if __name__ == "__main__":
                        port=DB_PORT,
                        host=DB_HOST)
 
+    engine = create_engine(DB_URL)
+
     create_tables(engine, CREATE_TABLES_SQL_FILE_PATH)
 
     session = get_session(engine)
@@ -31,25 +36,3 @@ if __name__ == "__main__":
     generated_test_data = generate_test_data()
 
     add_data(session, **generated_test_data)
-
-
-
-
-    # add_data(session, generated_test_data['data_by_student'])
-#
-#
-# from sqlalchemy import URL, create_engine, text
-#
-# superuser_url = URL.create(
-#     "postgresql",
-#     username=DB_SUPERUSER_USERNAME,
-#     password=DB_SUPERUSER_PASSWORD,
-#     host=DB_HOST,
-#     port=DB_PORT
-# )
-# engine = create_engine(superuser_url)
-# with engine.connect() as conn:
-#     conn.execution_options(isolation_level="AUTOCOMMIT")
-#     conn.execute(text(f"DROP DATABASE {DB_NAME} WITH (FORCE)"))
-#     conn.execute(text(f"DROP USER {DB_USERNAME}"))
-#     conn.execute(text(f"DROP ROLE {DB_ROLE}"))
