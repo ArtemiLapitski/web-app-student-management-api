@@ -31,8 +31,9 @@ if __name__ == "__main__":
 
     create_tables(engine, CREATE_TABLES_SQL_FILE_PATH)
 
-    session = get_session(engine)
-
     generated_test_data = generate_test_data()
 
-    add_data(session, **generated_test_data)
+    session = get_session(engine)
+
+    with session:
+        add_data(session, **generated_test_data)

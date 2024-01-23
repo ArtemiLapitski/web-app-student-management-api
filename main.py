@@ -10,9 +10,13 @@ def create_app():
     app.config['SQLALCHEMY_DATABASE_URI'] = DB_URL
     # app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SECRET_KEY'] = SECRET_KEY
-    db.init_app(app)
+    # db.init_app(app)
 
     return app
+
+
+def init_db(app):
+    return db.init_app(app)
 
 
 def create_api(app):
@@ -22,6 +26,7 @@ def create_api(app):
 
 if __name__ == '__main__':
     app = create_app()
+    init_db(app)
     api = create_api(app)
     add_urls(api)
     app.run(debug=True)

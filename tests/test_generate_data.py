@@ -1,8 +1,9 @@
 import pytest
-from app.generate_test_data import generate_students, generate_groups, assign_students_to_groups, \
-    assign_courses_to_students, get_courses_and_group_by_students
-from config import STUDENTS_PER_GROUP_MAX, STUDENTS_PER_GROUP_MIN, COURSES
-
+from app.generate_data import generate_students, generate_groups, assign_students_to_groups, \
+    assign_courses_to_students, get_data_by_student, get_courses, generate_test_data
+from config import STUDENTS_PER_GROUP_MAX, STUDENTS_PER_GROUP_MIN
+from tests.mocks import groups_mock, courses_mock, data_by_student_mock, students_mock, students_by_group_mock, \
+    courses_by_student_mock
 
 @pytest.mark.parametrize('execution_number', range(100))
 def test_generate_students(execution_number):
@@ -17,7 +18,8 @@ def test_generate_groups(execution_number):
 
 
 def test_courses():
-    assert len(set(COURSES)) == 10
+    courses = get_courses()
+    assert len(set(courses)) == 10
 
 
 @pytest.mark.parametrize('execution_number', range(100))
@@ -48,28 +50,31 @@ def test_assign_courses_to_students(execution_number):
 
 
 @pytest.mark.parametrize('execution_number', range(100))
-def test_courses_in_courses_and_group_by_students(execution_number):
+def test_courses_by_students_in_get_data_by_student(execution_number):
     groups = generate_groups()
     students = generate_students()
+    courses = get_courses()
 
     students_by_groups = assign_students_to_groups(students, groups)
-    courses_by_students = assign_courses_to_students(students)
+    courses_by_students = assign_courses_to_students(students, courses)
 
-    courses_and_group_by_students = get_courses_and_group_by_students(courses_by_students, students_by_groups)
+    courses_and_group_by_students = get_data_by_student(courses_by_students, students_by_groups)
 
     for student, data in courses_and_group_by_students.items():
         assert data['courses'] == courses_by_students[student]
 
+    assert len(courses_and_group_by_students.keys()) == len(courses_by_students.keys())
+
 
 @pytest.mark.parametrize('execution_number', range(100))
-def test_groups_in_courses_and_group_by_students(execution_number):
+def test_groups_get_data_by_student(execution_number):
     groups = generate_groups()
     students = generate_students()
 
     students_by_groups = assign_students_to_groups(students, groups)
     courses_by_students = assign_courses_to_students(students)
 
-    courses_and_group_by_students = get_courses_and_group_by_students(courses_by_students, students_by_groups)
+    courses_and_group_by_students = get_data_by_student(courses_by_students, students_by_groups)
 
     group_student_tuples = [(data['group'], student) for student, data in courses_and_group_by_students.items()]
 
@@ -87,20 +92,23 @@ def test_groups_in_courses_and_group_by_students(execution_number):
     assert students_by_group_recreated == students_by_groups
 
 
-@pytest.mark.parametrize('execution_number', range(100))
-def test_courses_in_courses_and_group_by_students(execution_number):
-    groups = generate_groups()
-    students = generate_students()
+# @pytest.mark.parametrize('execution_number', range(100))
+def test_generate_test_data(mocker):
+    mocker.patch('app.generate_data.generate_students', return_value=students_mock)
+    mocker.patch('app.generate_data.generate_groups', return_value=groups_mock)
+    mocker.patch('app.generate_data.get_courses', return_value=courses_mock)
+    mocker.patch('app.generate_data.get_data_by_student', return_value=data_by_student_mock)
 
-    students_by_groups = assign_students_to_groups(students, groups)
-    courses_by_students = assign_courses_to_students(students)
+    generated_data = generate_test_data()
 
-    courses_and_group_by_students = get_courses_and_group_by_students(courses_by_students, students_by_groups)
-
-    assert len(courses_and_group_by_students.keys()) == len(courses_by_students.keys())
-
+    assert generated_data['groups'] == groups_mock
+    assert generated_data['courses'] == courses_mock
+    assert generated_data['data_by_student'] == data_by_student_mock
 
 
+# 'groups': generated_groups,
+# 'courses': courses,
+# 'data_by_student': data_by_student
 
 
 

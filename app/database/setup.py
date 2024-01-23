@@ -131,7 +131,7 @@ def add_students(session, data_by_student: dict):
         session.commit()
 
 
-def add_data(session, groups: list, courses: list, data_by_student: dict, **kwargs):
+def add_data(session, groups: list, courses: list, data_by_student: dict):
     add_courses(session, courses)
     add_groups(session, groups)
     add_students(session, data_by_student)

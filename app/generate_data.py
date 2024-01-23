@@ -80,32 +80,34 @@ def generate_test_data():
 
     students_by_group = assign_students_to_groups(generated_students, generated_groups)
     courses_by_student = assign_courses_to_students(generated_students, courses)
+
     data_by_student = get_data_by_student(courses_by_student, students_by_group)
 
-    return {'students': generated_students,
+    return {
             'groups': generated_groups,
             'courses': courses,
-            'students_by_group': students_by_group,
-            'courses_by_student': courses_by_student,
             'data_by_student': data_by_student
             }
 
 
-courses = get_courses()
-students = generate_students()
-groups = generate_groups()
-students_by_groups = assign_students_to_groups(students, groups)
-courses_by_students = assign_courses_to_students(students, courses)
-courses_and_group_by_students = get_data_by_student(courses_by_students, students_by_groups)
-print('students')
-print(students)
-print('groups')
-print(groups)
-print('courses')
-print(courses)
-print('students_by_groups')
-print(students_by_groups)
-print('courses_by_students')
-print(courses_by_students)
-print('courses_and_group_by_students')
-print(courses_and_group_by_students)
+# courses = get_courses()
+# students = generate_students()
+# groups = generate_groups()
+# students_by_groups = assign_students_to_groups(students, groups)
+# courses_by_students = assign_courses_to_students(students, courses)
+# courses_and_group_by_students = get_data_by_student(courses_by_students, students_by_groups)
+# print('students')
+# print(students)
+# print('groups')
+# print(groups)
+# print('courses')
+# print(courses)
+# print('students_by_groups')
+# print(students_by_groups)
+# print('courses_by_students')
+# print(courses_by_students)
+# print('courses_and_group_by_students')
+# print(courses_and_group_by_students)
+# 'students_by_group': students_by_group,
+# 'courses_by_student': courses_by_student,
+# 'students': generated_students,
