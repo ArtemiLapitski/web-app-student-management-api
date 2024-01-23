@@ -1,6 +1,6 @@
 from app.database.setup import (create_db_and_user, create_tables, add_data, get_session)
 from os import environ
-from config import CREATE_TABLES_SQL_FILE_PATH, DB_URL
+from config import CREATE_TABLES_SQL_FILE_PATH
 from app.generate_data import generate_test_data
 from sqlalchemy import create_engine
 
@@ -13,6 +13,9 @@ DB_NAME = environ['DB_NAME']
 DB_ROLE = environ['DB_ROLE']
 DB_PORT = int(environ['DB_PORT'])
 DB_HOST = "host.docker.internal"
+
+
+DB_URL = f'postgresql://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
 
 
 if __name__ == "__main__":
