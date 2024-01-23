@@ -1,9 +1,8 @@
 from sqlalchemy import func
-# from app.database.connection import db.session
 from app.database.models import StudentModel, GroupModel, CourseModel, CourseStudentModel, db
 
 
-def add_student(first_name: str, last_name: str, courses: list, group: str):
+def add_student(first_name: str, last_name: str, courses: list, group: str) -> int:
     if group:
         group_id = db.session.query(GroupModel).filter_by(group_name=group).first().group_id
     else:

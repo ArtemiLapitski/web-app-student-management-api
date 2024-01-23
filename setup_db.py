@@ -4,7 +4,7 @@ from config import CREATE_TABLES_SQL_FILE_PATH, DB_URL
 from app.generate_data import generate_test_data
 from sqlalchemy import create_engine
 
-# to delete
+
 DB_SUPERUSER_USERNAME = environ['DB_SUPERUSER_USERNAME']
 DB_SUPERUSER_PASSWORD = environ['DB_SUPERUSER_PASSWORD']
 DB_USERNAME = environ['DB_USERNAME']
@@ -12,9 +12,7 @@ DB_PASSWORD = environ['DB_PASSWORD']
 DB_NAME = environ['DB_NAME']
 DB_ROLE = environ['DB_ROLE']
 DB_PORT = int(environ['DB_PORT'])
-
-# DB_HOST = "host.docker.internal"
-DB_HOST = 'localhost'
+DB_HOST = "host.docker.internal"
 
 
 if __name__ == "__main__":

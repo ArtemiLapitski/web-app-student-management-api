@@ -1,8 +1,6 @@
 from sqlalchemy import select, func
-from app.database.setup import create_db_and_user, create_tables, get_session, add_data
-from config import COURSES
 from app.database.models import StudentModel, GroupModel, CourseModel, CourseStudentModel, db
-from tests.mocks import groups_mock, courses_mock, data_by_student_mock, students_mock, students_by_group_mock, \
+from tests.mocks import groups_mock, courses_mock, students_mock, students_by_group_mock, \
     courses_by_student_mock
 
 

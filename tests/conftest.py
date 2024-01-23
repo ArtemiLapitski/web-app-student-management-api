@@ -67,11 +67,6 @@ def client(request):
     return client
 
 
-# @pytest.fixture(scope="session")
-# def db():
-#     return db
-
-
 @pytest.fixture(scope='function')
 def session(client, request):
     connection = db.engine.connect()
@@ -90,10 +85,3 @@ def session(client, request):
 
     request.addfinalizer(teardown)
     return session
-
-
-# @pytest.fixture(scope="session")
-# def sqlalchemy_session():
-#     engine = create_engine(DB_URL)
-#     session = get_session(engine)
-#     return session

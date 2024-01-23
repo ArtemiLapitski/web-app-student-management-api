@@ -1,16 +1,19 @@
 from sqlalchemy import URL, text, create_engine
 from sqlalchemy.orm import sessionmaker
 from app.database.models import StudentModel, GroupModel, CourseModel, CourseStudentModel
+from sqlalchemy.engine.base import Engine
+from sqlalchemy.orm import Session
 
 
-def create_db_and_user(superuser_username: str,
-              superuser_password: str,
-              username: str,
-              password: str,
-              db_name: str,
-              role: str,
-              port: int,
-              host: str):
+def create_db_and_user(
+        superuser_username: str,
+        superuser_password: str,
+        username: str,
+        password: str,
+        db_name: str,
+        role: str,
+        port: int,
+        host: str):
 
     superuser_url = URL.create(
         "postgresql",
@@ -40,20 +43,8 @@ def create_db_and_user(superuser_username: str,
         conn.execute(text(f"GRANT ALL ON SCHEMA public TO {role}"))
         conn.commit()
 
-    # db_user_url = URL.create(
-    #     "postgresql",
-    #     username=username,
-    #     password=password,
-    #     host=host,
-    #     port=port,
-    #     database=db_name
-    # )
-    # engine = create_engine(db_user_url)
-    #
-    # return engine
 
-
-def create_tables(engine, sql_file_path: str):
+def create_tables(engine: Engine, sql_file_path: str):
 
     with engine.connect() as conn:
         with open(sql_file_path) as file:
@@ -62,55 +53,27 @@ def create_tables(engine, sql_file_path: str):
             conn.commit()
 
 
-def get_session(engine):
+def get_session(engine: Engine) -> Session:
     Session = sessionmaker(engine)
     session = Session()
-
     return session
 
 
-# def get_id_or_create_course(session, model, course_name):
-#     instance = session.query(model).filter_by(course_name=course_name).first()
-#
-#     if not instance:
-#         instance = model(course_name=course_name)
-#         session.add(instance)
-#         session.commit()
-#
-#     return instance.course_id
-#
-#
-# def get_id_or_create_group(session, model, group_name):
-#
-#     if not group_name:
-#         return None
-#
-#     else:
-#         instance = session.query(model).filter_by(group_name=group_name).first()
-#
-#         if not instance:
-#             instance = model(group_name=group_name)
-#             session.add(instance)
-#             session.commit()
-#
-#         return instance.group_id
-
-
-def add_courses(session, courses: list):
+def add_courses(session: Session, courses: list):
     with session:
         for course in courses:
             session.add(CourseModel(course_name=course))
         session.commit()
 
 
-def add_groups(session, groups: list):
+def add_groups(session: Session, groups: list):
     with session:
         for group in groups:
             session.add(GroupModel(group_name=group))
         session.commit()
 
 
-def add_students(session, data_by_student: dict):
+def add_students(session: Session, data_by_student: dict):
     with session:
         for student_name, data in data_by_student.items():
 
@@ -131,7 +94,7 @@ def add_students(session, data_by_student: dict):
         session.commit()
 
 
-def add_data(session, groups: list, courses: list, data_by_student: dict):
+def add_data(session: Session, groups: list, courses: list, data_by_student: dict):
     add_courses(session, courses)
     add_groups(session, groups)
     add_students(session, data_by_student)

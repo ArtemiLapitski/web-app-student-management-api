@@ -61,7 +61,7 @@ def assign_courses_to_students(students: list, courses: list) -> dict:
     return courses_by_student
 
 
-def get_data_by_student(courses_by_students: dict, students_by_groups: dict):
+def get_data_by_student(courses_by_students: dict, students_by_groups: dict) -> dict:
     data_by_student = {student: {'courses': courses} for student, courses in courses_by_students.items()}
 
     for group, students in students_by_groups.items():
@@ -88,26 +88,3 @@ def generate_test_data():
             'courses': courses,
             'data_by_student': data_by_student
             }
-
-
-# courses = get_courses()
-# students = generate_students()
-# groups = generate_groups()
-# students_by_groups = assign_students_to_groups(students, groups)
-# courses_by_students = assign_courses_to_students(students, courses)
-# courses_and_group_by_students = get_data_by_student(courses_by_students, students_by_groups)
-# print('students')
-# print(students)
-# print('groups')
-# print(groups)
-# print('courses')
-# print(courses)
-# print('students_by_groups')
-# print(students_by_groups)
-# print('courses_by_students')
-# print(courses_by_students)
-# print('courses_and_group_by_students')
-# print(courses_and_group_by_students)
-# 'students_by_group': students_by_group,
-# 'courses_by_student': courses_by_student,
-# 'students': generated_students,

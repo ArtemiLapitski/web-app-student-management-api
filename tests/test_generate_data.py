@@ -2,8 +2,8 @@ import pytest
 from app.generate_data import generate_students, generate_groups, assign_students_to_groups, \
     assign_courses_to_students, get_data_by_student, get_courses, generate_test_data
 from config import STUDENTS_PER_GROUP_MAX, STUDENTS_PER_GROUP_MIN
-from tests.mocks import groups_mock, courses_mock, data_by_student_mock, students_mock, students_by_group_mock, \
-    courses_by_student_mock
+from tests.mocks import groups_mock, courses_mock, data_by_student_mock
+
 
 @pytest.mark.parametrize('execution_number', range(100))
 def test_generate_students(execution_number):
@@ -40,7 +40,8 @@ def test_assign_students_to_groups(execution_number):
 @pytest.mark.parametrize('execution_number', range(100))
 def test_assign_courses_to_students(execution_number):
     students = generate_students()
-    courses_by_students = assign_courses_to_students(students)
+    courses = get_courses()
+    courses_by_students = assign_courses_to_students(students, courses)
 
     for _, courses in courses_by_students.items():
         assert len(courses) in (1, 2, 3)
@@ -70,17 +71,22 @@ def test_courses_by_students_in_get_data_by_student(execution_number):
 def test_groups_get_data_by_student(execution_number):
     groups = generate_groups()
     students = generate_students()
+    courses = get_courses()
 
     students_by_groups = assign_students_to_groups(students, groups)
-    courses_by_students = assign_courses_to_students(students)
+    courses_by_students = assign_courses_to_students(students, courses)
 
     courses_and_group_by_students = get_data_by_student(courses_by_students, students_by_groups)
 
-    group_student_tuples = [(data['group'], student) for student, data in courses_and_group_by_students.items()]
+    group_student_tuples = [(data.get('group'), student) for student, data in courses_and_group_by_students.items()]
 
     students_by_group_recreated = {}
     for group, student in group_student_tuples:
-        if group not in students_by_group_recreated.keys():
+        if not group:
+            if 'no_group' not in students_by_group_recreated.keys():
+                students_by_group_recreated['no_group'] = []
+            group = 'no_group'
+        elif group not in students_by_group_recreated.keys():
             students_by_group_recreated[group] = []
         students_by_group_recreated[group].append(student)
 
@@ -92,9 +98,7 @@ def test_groups_get_data_by_student(execution_number):
     assert students_by_group_recreated == students_by_groups
 
 
-# @pytest.mark.parametrize('execution_number', range(100))
 def test_generate_test_data(mocker):
-    mocker.patch('app.generate_data.generate_students', return_value=students_mock)
     mocker.patch('app.generate_data.generate_groups', return_value=groups_mock)
     mocker.patch('app.generate_data.get_courses', return_value=courses_mock)
     mocker.patch('app.generate_data.get_data_by_student', return_value=data_by_student_mock)
@@ -105,10 +109,6 @@ def test_generate_test_data(mocker):
     assert generated_data['courses'] == courses_mock
     assert generated_data['data_by_student'] == data_by_student_mock
 
-
-# 'groups': generated_groups,
-# 'courses': courses,
-# 'data_by_student': data_by_student
 
 
 
