@@ -73,7 +73,7 @@ def session(client, request):
     transaction = connection.begin()
 
     options = dict(bind=connection, binds={})
-    session = db.create_scoped_session(options=options)
+    session = db._make_scoped_session(options=options)
 
     db.session = session
 
