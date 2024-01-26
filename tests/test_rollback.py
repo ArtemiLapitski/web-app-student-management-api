@@ -27,7 +27,7 @@ def test_add_course(db_setup, client, session):
     session.commit()
 
 
-def test_check_course_want_added(db_setup, client, session):
+def test_check_course_wasnt_added(db_setup, client, session):
     all_courses = session.execute(select(CourseModel.course_name)).all()
 
     print([course_name[0] for course_name in all_courses])
