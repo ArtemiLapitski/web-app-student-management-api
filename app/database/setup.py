@@ -3,6 +3,7 @@ from sqlalchemy.orm import sessionmaker
 from app.database.models import StudentModel, GroupModel, CourseModel, CourseStudentModel
 from sqlalchemy.engine.base import Engine
 from sqlalchemy.orm import Session
+from config import DB_URL, CREATE_TABLES_SQL_FILE_PATH
 
 
 def create_db_and_user(
@@ -98,3 +99,20 @@ def add_data(session: Session, groups: list, courses: list, data_by_student: dic
     add_courses(session, courses)
     add_groups(session, groups)
     add_students(session, data_by_student)
+
+
+def create_tables_with_data(engine: Engine, session: Session, groups: list, courses: list, data_by_student: dict):
+    # engine = create_engine(DB_URL)
+    create_tables(engine, CREATE_TABLES_SQL_FILE_PATH)
+    # session = get_session(engine)
+    with session:
+        add_data(session, groups=groups, courses=courses, data_by_student=data_by_student)
+
+
+def drop_tables(engine: Engine):
+    with engine.connect() as conn:
+        conn.execution_options(isolation_level="AUTOCOMMIT")
+        conn.execute(text(f"DROP TABLE course_student"))
+        conn.execute(text(f"DROP TABLE student"))
+        conn.execute(text(f"DROP TABLE course"))
+        conn.execute(text(f"DROP TABLE student_group"))

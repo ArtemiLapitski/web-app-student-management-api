@@ -1,6 +1,8 @@
-from flask_sqlalchemy import SQLAlchemy
+# from flask_sqlalchemy import SQLAlchemy
+#
+# db = SQLAlchemy()
 
-db = SQLAlchemy()
+from app.database.db import db
 
 
 class GroupModel(db.Model):

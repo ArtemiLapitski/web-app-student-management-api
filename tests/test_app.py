@@ -2,13 +2,13 @@ import json
 from tests.mocks import students_for_physics_mocked, groups_with_student_count_lte_15_mocked
 
 
-def test_groups(db_setup, client, session):
+def test_groups(db_setup, client, db_tables):
     groups_with_student_count_lte_15 = client.get('groups', query_string={'student_count_lte': 15})
     groups_with_student_count_lte_15 = json.loads(groups_with_student_count_lte_15.data)
     assert groups_with_student_count_lte_15 == groups_with_student_count_lte_15_mocked
 
 
-def test_students_for_course(db_setup, client, session):
+def test_students_for_course(db_setup, client, db_tables):
     students_for_course = client.get('students', query_string={'course': 'Physics'})
     students_for_course = json.loads(students_for_course.data)
     assert students_for_course == students_for_physics_mocked

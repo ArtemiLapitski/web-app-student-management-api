@@ -4,10 +4,20 @@ from app.urls import add_urls
 from tests.mocks import groups_mock, courses_mock, data_by_student_mock
 from config import DB_URL
 from sqlalchemy import create_engine, URL, text
-from app.database.setup import create_db_and_user, create_tables, get_session, add_data
+from app.database.setup import create_db_and_user, get_session, create_tables_with_data, drop_tables
 from config import (DB_USERNAME, DB_PASSWORD, DB_ROLE, DB_NAME, DB_HOST, DB_SUPERUSER_PASSWORD,
-                    DB_SUPERUSER_USERNAME, DB_PORT, CREATE_TABLES_SQL_FILE_PATH)
-from app.database.models import db
+                    DB_SUPERUSER_USERNAME, DB_PORT)
+from app.database.db import db
+
+
+@pytest.fixture(scope="session")
+def db_engine():
+    return create_engine(DB_URL)
+
+
+@pytest.fixture(scope="session")
+def db_session(db_engine):
+    return get_session(db_engine)
 
 
 @pytest.fixture(scope="session")
@@ -20,15 +30,6 @@ def db_setup(request):
                        role=DB_ROLE,
                        port=DB_PORT,
                        host=DB_HOST)
-
-    engine = create_engine(DB_URL)
-
-    create_tables(engine, CREATE_TABLES_SQL_FILE_PATH)
-
-    session = get_session(engine)
-
-    with session:
-        add_data(session, groups=groups_mock, courses=courses_mock, data_by_student=data_by_student_mock)
 
     def teardown():
         superuser_url = URL.create(
@@ -51,37 +52,34 @@ def db_setup(request):
 @pytest.fixture(scope="session")
 def client(request):
     app = create_app()
-    app.config['TESTING'] = True
     db.init_app(app)
     api = create_api(app)
     add_urls(api)
+
     client = app.test_client()
 
-    ctx = app.app_context()
-    ctx.push()
+    # ctx = app.app_context()
+    # ctx.push()
+    #
+    # yield client
+    #
+    # ctx.pop()
 
-    def teardown():
-        ctx.pop()
-
-    request.addfinalizer(teardown)
+    # def teardown():
+    #     ctx.pop()
+    #
+    # request.addfinalizer(teardown)
+    # return client
+    #
+    #
     return client
 
 
-@pytest.fixture(scope='function')
-def session(client, request):
-    connection = db.engine.connect()
-    transaction = connection.begin()
-
-    options = dict(bind=connection, binds={})
-    session = db._make_scoped_session(options=options)
-
-    db.session = session
-
-    def teardown():
-        session.close()
-        transaction.rollback()
-        connection.close()
-        session.remove()
-
-    request.addfinalizer(teardown)
-    return session
+@pytest.fixture(scope="function")
+def db_tables(db_engine, db_session):
+    # engine = create_engine(DB_URL)
+    # session = get_session(engine)
+    create_tables_with_data(session=db_session, engine=db_engine, groups=groups_mock, courses=courses_mock,
+                            data_by_student=data_by_student_mock)
+    yield
+    drop_tables(db_engine)

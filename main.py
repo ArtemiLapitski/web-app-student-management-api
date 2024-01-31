@@ -2,7 +2,7 @@ from flask import Flask
 from flask_restful import Api
 from app.urls import add_urls
 from config import SECRET_KEY, DB_URL
-from app.database.models import db
+from app.database.db import db
 
 
 def create_app():

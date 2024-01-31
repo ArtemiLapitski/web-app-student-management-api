@@ -1,21 +1,21 @@
 from sqlalchemy import select, func
-from app.database.models import StudentModel, GroupModel, CourseModel, CourseStudentModel, db
+from app.database.models import StudentModel, GroupModel, CourseModel, CourseStudentModel
 from tests.mocks import groups_mock, courses_mock, students_mock, students_by_group_mock, \
     courses_by_student_mock
 
 
-def test_students(db_setup, client):
+def test_students(db_setup, db_tables, db_session):
 
-    students_from_db = db.session.execute(select(StudentModel.student_id, StudentModel.first_name,
+    students_from_db = db_session.execute(select(StudentModel.student_id, StudentModel.first_name,
                                       StudentModel.last_name)).all()
 
     assert students_from_db == students_mock
     assert len(students_from_db) == 200
 
 
-def test_groups(db_setup, client):
+def test_groups(db_setup, db_tables, db_session):
 
-    groups_from_db = db.session.execute(select(GroupModel.group_name)).all()
+    groups_from_db = db_session.execute(select(GroupModel.group_name)).all()
 
     groups_from_db_list = [group[0] for group in groups_from_db]
 
@@ -23,23 +23,23 @@ def test_groups(db_setup, client):
     assert len(groups_from_db) == 10
 
 
-def test_courses(db_setup, client):
+def test_courses(db_setup, db_tables, db_session):
 
-    courses = db.session.execute(select(CourseModel.course_name)).all()
+    courses = db_session.execute(select(CourseModel.course_name)).all()
 
     courses = [course_name[0] for course_name in courses]
 
     assert courses == courses_mock
 
 
-def test_students_by_groups(db_setup, client):
+def test_students_by_groups(db_setup, db_tables, db_session):
 
     for group, students in students_by_group_mock.items():
         students_name_only = [' '.join(student[1:]) for student in students]
         students_name_only.reverse()
         students_by_group_mock[group] = students_name_only
 
-    students_by_groups_from_db = db.session.execute(select(
+    students_by_groups_from_db = db_session.execute(select(
         GroupModel.group_name,
         func.array_agg(func.concat(StudentModel.first_name, ' ', StudentModel.last_name)))
         .join(StudentModel, StudentModel.group_id == GroupModel.group_id)
@@ -47,7 +47,7 @@ def test_students_by_groups(db_setup, client):
         ).all()
     students_by_groups_from_db = {data[0]: data[1] for data in students_by_groups_from_db}
     
-    students_without_group = db.session.execute(select(StudentModel.first_name, StudentModel.last_name)
+    students_without_group = db_session.execute(select(StudentModel.first_name, StudentModel.last_name)
                                              .where(StudentModel.group_id == None)).all()
     if students_without_group:
         students_without_group_strings = [' '.join(student) for student in students_without_group]
@@ -57,9 +57,9 @@ def test_students_by_groups(db_setup, client):
     assert students_by_groups_from_db == students_by_group_mock
 
 
-def test_courses_by_students(db_setup, client):
+def test_courses_by_students(db_setup, db_tables, db_session):
 
-    courses_by_students_from_bd = db.session.execute(
+    courses_by_students_from_bd = db_session.execute(
         select(
             func.concat(StudentModel.student_id,
                         ' ',

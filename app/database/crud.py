@@ -1,5 +1,6 @@
 from sqlalchemy import func
-from app.database.models import StudentModel, GroupModel, CourseModel, CourseStudentModel, db
+from app.database.models import StudentModel, GroupModel, CourseModel, CourseStudentModel
+from app.database.db import db
 
 
 def add_student(first_name: str, last_name: str, courses: list, group: str) -> int:
