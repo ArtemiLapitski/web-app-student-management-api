@@ -10,14 +10,7 @@ from config import (DB_USERNAME, DB_PASSWORD, DB_ROLE, DB_NAME, DB_HOST, DB_SUPE
 from app.database.db import db
 
 
-@pytest.fixture(scope="session")
-def db_engine():
-    return create_engine(DB_URL)
 
-
-@pytest.fixture(scope="session")
-def db_session(db_engine):
-    return get_session(db_engine)
 
 
 @pytest.fixture(scope="session")
@@ -31,26 +24,27 @@ def db_setup(request):
                        port=DB_PORT,
                        host=DB_HOST)
 
-    def teardown():
-        superuser_url = URL.create(
-            "postgresql",
-            username=DB_SUPERUSER_USERNAME,
-            password=DB_SUPERUSER_PASSWORD,
-            host=DB_HOST,
-            port=DB_PORT
-        )
-        engine = create_engine(superuser_url)
-        with engine.connect() as conn:
-            conn.execution_options(isolation_level="AUTOCOMMIT")
-            conn.execute(text(f"DROP DATABASE {DB_NAME} WITH (FORCE)"))
-            conn.execute(text(f"DROP USER {DB_USERNAME}"))
-            conn.execute(text(f"DROP ROLE {DB_ROLE}"))
+    # def teardown():
+    yield
+    superuser_url = URL.create(
+        "postgresql",
+        username=DB_SUPERUSER_USERNAME,
+        password=DB_SUPERUSER_PASSWORD,
+        host=DB_HOST,
+        port=DB_PORT
+    )
+    engine = create_engine(superuser_url)
+    with engine.connect() as conn:
+        conn.execution_options(isolation_level="AUTOCOMMIT")
+        conn.execute(text(f"DROP DATABASE {DB_NAME} WITH (FORCE)"))
+        conn.execute(text(f"DROP USER {DB_USERNAME}"))
+        conn.execute(text(f"DROP ROLE {DB_ROLE}"))
 
-    request.addfinalizer(teardown)
+    # request.addfinalizer(teardown)
 
 
 @pytest.fixture(scope="session")
-def client(request):
+def client():
     app = create_app()
     db.init_app(app)
     api = create_api(app)
@@ -75,8 +69,18 @@ def client(request):
     return client
 
 
+@pytest.fixture(scope="session")
+def db_engine():
+    return create_engine(DB_URL)
+
+
+@pytest.fixture(scope="session")
+def db_session(db_engine):
+    return get_session(db_engine)
+
+
 @pytest.fixture(scope="function")
-def db_tables(db_engine, db_session):
+def db_create_tables(db_engine, db_session):
     # engine = create_engine(DB_URL)
     # session = get_session(engine)
     create_tables_with_data(session=db_session, engine=db_engine, groups=groups_mock, courses=courses_mock,

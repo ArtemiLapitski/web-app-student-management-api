@@ -4,15 +4,20 @@ from app.database.crud import (add_student, get_groups_lte_student_count, get_st
 from flask import request
 from app.schema.schemas import (StudentCountToValidate, CourseNameToValidate, StudentToCreate, StudentIdToValidate,
                                 CourseToAdd, CourseToDelete)
+from flask_pydantic import validate
 
 
 class Groups(Resource):
+    @validate()
+    def get(self, query: StudentCountToValidate):
+        student_count_lte = query.student_count_lte
+        return get_groups_lte_student_count(student_count_lte)
 
-    def get(self):
-        student_count_lte = request.args.get("student_count_lte")
-        student_count = StudentCountToValidate(student_count_lte=student_count_lte).student_count_lte
-
-        return get_groups_lte_student_count(student_count)
+    # def get(self):
+    #     student_count_lte = request.args.get("student_count_lte")
+    #     student_count = StudentCountToValidate(student_count_lte=student_count_lte).student_count_lte
+    #
+    #     return get_groups_lte_student_count(student_count)
 
 
 class Students(Resource):
