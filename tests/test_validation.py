@@ -2,25 +2,40 @@ import json
 
 
 def test_student_count_validation(db_setup, client, db_create_tables):
-    response = client.get('groups')
+    response = client.get('groups', query_string={'student_count_lte': '-15'})
     print(response.data)
     # response = json.loads(response.data)
     # assert "Amount of students cannot be negative" in response
 
 
 def test_course_name_validation(db_setup, client, db_create_tables):
-    students_for_course = client.get('students', query_string={'course': 'matan'})
+    response = client.get('students', query_string={'course': 'matan'})
     # students_for_course = json.loads(students_for_course.data)
-    print(students_for_course)
+    print(response.data)
     # assert students_for_course == students_for_physics_mocked
 
+
+new_student = {"first_name": "George!", "last_name": "Washington", "courses": ["Art", "Science", "Physics"]}
+
+
+def test_create_student_name_validation(db_setup, client, db_create_tables):
+    # data = {"first_name": "George", "last_name": "Washington", "courses": ["Art", "Science", "Physics"]}
+    response = client.post('students', content_type='application/json', data=json.dumps(new_student))
+    response = json.loads(response.data)
+    print(response)
+    # assert response == create_new_student_response
+
+
+
+
+# DONE
 # def student_count_validation(cls, v):
 #     if v < 0:
 #         raise ValueError("Amount of students cannot be negative")
 #     else:
 #         return v
-#
-#
+
+# DONE
 # def course_name_validation(cls, v):
 #     all_courses = get_list_of_courses()
 #     if not v.replace(' ', '').isalpha():
@@ -29,8 +44,9 @@ def test_course_name_validation(db_setup, client, db_create_tables):
 #         raise ValueError(f"'{v}' course does not exist")
 #     else:
 #         return v
-#
-#
+
+
+
 # def name_validation(cls, v):
 #     if not v.isalpha():
 #         raise ValueError("Numbers, spaces or special characters are not allowed")

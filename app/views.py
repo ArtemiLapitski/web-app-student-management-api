@@ -2,6 +2,7 @@ from flask_restful import Resource
 from app.database.crud import (add_student, get_groups_lte_student_count, get_students_for_course, delete_student,
                                get_student, add_course_to_student, delete_student_from_course)
 from flask import request
+# from app.schema.schemas import StudentCountToValidate
 from app.schema.schemas import (StudentCountToValidate, CourseNameToValidate, StudentToCreate, StudentIdToValidate,
                                 CourseToAdd, CourseToDelete)
 from flask_pydantic import validate
@@ -21,20 +22,17 @@ class Groups(Resource):
 
 
 class Students(Resource):
-    def get(self):
+    @validate()
+    def get(self, query: CourseNameToValidate):
 
-        course_param = request.args.get("course")
-        course_name = CourseNameToValidate(course=course_param).course
+        course_name = query.course
+        # course_name = CourseNameToValidate(course=course_name).course
 
         return get_students_for_course(course_name)
 
-    def post(self):
-
-        student_data = request.get_json()
-        student_data_validated = StudentToCreate(**student_data)
-        student_data_validated_dict = student_data_validated.model_dump()
-        student_id = add_student(**student_data_validated_dict)
-
+    @validate()
+    def post(self, body: StudentToCreate):
+        student_id = add_student(**body.dict())
         return get_student(student_id)
 
     def delete(self, student_id):

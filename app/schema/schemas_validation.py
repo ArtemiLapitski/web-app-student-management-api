@@ -26,7 +26,7 @@ def name_validation(cls, v):
         return v.title()
 
 
-def course_names_validation(cls, v):
+def courses_list_validation(cls, v):
     all_courses = get_list_of_courses()
     for course_name in v:
         if course_name not in all_courses:
@@ -61,17 +61,17 @@ def course_id_validation(cls, v):
         return v
 
 
-def no_course_for_student_validation(self):
-    student_id = self.student_id
-    course_id = self.course_id
+def no_course_for_student_validation(cls, v, values):
+    student_id = v
+    course_id = values['course_id']
     is_course_for_student = check_course_for_student(student_id, course_id)
     if is_course_for_student:
         raise ValueError(f"This course is already assigned to student")
 
 
-def course_exists_for_student_validation(self):
-    student_id = self.student_id
-    course_id = self.course_id
+def course_exists_for_student_validation(cls, v, values):
+    student_id = v
+    course_id = values['course_id']
     is_course_for_student = check_course_for_student(student_id, course_id)
     if not is_course_for_student:
         raise ValueError(f"This course is not assigned to student")
