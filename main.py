@@ -27,3 +27,13 @@ if __name__ == '__main__':
     api = create_api(app)
     add_urls(api)
     app.run(debug=True)
+
+
+# with app.app_context():
+#     from app.schema.schemas import StudentToCreate
+#     # from app.database.validation import get_list_of_courses
+#
+#     # print(get_list_of_courses())
+#
+#     StudentToCreate(first_name='Ge', last_name='Me', courses=['Music', 'PE'])
+

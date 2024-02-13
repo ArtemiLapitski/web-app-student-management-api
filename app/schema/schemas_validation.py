@@ -33,8 +33,7 @@ def courses_list_validation(cls, v):
             raise ValueError(f"'{course_name}' course does not exist")
         elif not course_name.replace(' ', '').isalpha():
             raise ValueError("Course name should not contain numbers or special characters")
-        else:
-            return v
+    return v
 
 
 def group_validation(cls, v):
