@@ -98,7 +98,8 @@ courses_error_params = [
 ]
 
 
-new_student_courses_validation = {"first_name": "George", "last_name": "Washington", "courses": ["Science", "Physics", "PE"]}
+new_student_courses_validation = {"first_name": "George", "last_name": "Washington",
+                                  "courses": ["Science", "Physics", "PE"]}
 courses_error = (b'{"validation_error":{"body_params":[{"loc":["courses"],"msg":"\'PE\' cours'
                  b'e does not exist","type":"value_error"}]}}\n')
 
@@ -119,78 +120,75 @@ def test_create_student_group_validation(db_setup, client, db_create_tables):
     assert response.data == group_error
 
 
-# DONE
-# def student_count_validation(cls, v):
-#     if v < 0:
-#         raise ValueError("Amount of students cannot be negative")
-#     else:
-#         return v
+student_id_error_params = [
+    (
+        'abc',
+        b'{"validation_error":{"path_params":[{"loc":["student_id"],"msg":"value is no'
+        b't a valid integer","type":"type_error.integer"}]}}\n'
+    ),
+    (
+        -2,
+        b'{"message": "Student under id \'-2\' does not exist"}\n'
+    ),
+    (
+        100500,
+        b'{"message": "Student under id \'100500\' does not exist"}\n'
+    )
+]
 
-# DONE
-# def course_name_validation(cls, v):
-#     all_courses = get_list_of_courses()
-#     if not v.replace(' ', '').isalpha():
-#         raise ValueError("Course name should not contain numbers or special characters")
-#     if v not in all_courses:
-#         raise ValueError(f"'{v}' course does not exist")
-#     else:
-#         return v
+
+@pytest.mark.parametrize('student_id, error', student_id_error_params)
+def test_delete_student_id_validation(db_setup, client, db_create_tables, student_id, error):
+    response = client.delete(f"students/{student_id}")
+    assert response.data == error
 
 
-# DONE
-# def name_validation(cls, v):
-#     if not v.isalpha():
-#         raise ValueError("Numbers, spaces or special characters are not allowed")
-#     else:
-#         return v.title()
-#
-## DONE
-# def course_names_validation(cls, v):
-#     all_courses = get_list_of_courses()
-#     for course_name in v:
-#         if course_name not in all_courses:
-#             raise ValueError(f"'{course_name}' course does not exist")
-#         elif not course_name.replace(' ', '').isalpha():
-#             raise ValueError("Course name should not contain numbers or special characters")
-#         else:
-#             return v
-#
-### DONE
-# def group_validation(cls, v):
-#     all_groups = get_list_of_groups()
-#     if v != 'no_group' and v not in all_groups:
-#         raise ValueError(f"'{v}' group does not exist")
-#     else:
-#         return v
-#
-#
-# def student_id_validation(cls, v):
-#     is_student = check_student_id(v)
-#     if not is_student:
-#         raise ValueError(f"Student with '{v}' id does not exist")
-#     else:
-#         return v
-#
-#
-# def course_id_validation(cls, v):
-#     is_course = check_course_id(v)
-#     if not is_course:
-#         raise ValueError(f"Course with '{v}' id does not exist")
-#     else:
-#         return v
-#
-#
-# def no_course_for_student_validation(self):
-#     student_id = self.student_id
-#     course_id = self.course_id
-#     is_course_for_student = check_course_for_student(student_id, course_id)
-#     if is_course_for_student:
-#         raise ValueError(f"This course is already assigned to student")
-#
-#
-# def course_exists_for_student_validation(self):
-#     student_id = self.student_id
-#     course_id = self.course_id
-#     is_course_for_student = check_course_for_student(student_id, course_id)
-#     if not is_course_for_student:
-#         raise ValueError(f"This course is not assigned to student")
+@pytest.mark.parametrize('student_id, error', student_id_error_params)
+def test_add_course_student_id_validation(db_setup, client, db_create_tables, student_id, error):
+    response = client.put(f"students/{student_id}/courses/1")
+    assert response.data == error
+
+
+@pytest.mark.parametrize('student_id, error', student_id_error_params)
+def test_delete_course_student_id_validation(db_setup, client, db_create_tables, student_id, error):
+    response = client.delete(f"students/{student_id}/courses/1")
+    assert response.data == error
+
+
+course_id_error_params = [
+    (
+        'abc',
+        b'{"validation_error":{"path_params":[{"loc":["course_id"],"msg":"value is no'
+        b't a valid integer","type":"type_error.integer"}]}}\n'
+    ),
+    (
+        -2,
+        b'{"message": "Course under id \'-2\' does not exist"}\n'
+    ),
+    (
+        100500,
+        b'{"message": "Course under id \'100500\' does not exist"}\n'
+    )
+]
+
+
+@pytest.mark.parametrize('course_id, error', course_id_error_params)
+def test_add_course_id_validation(db_setup, client, db_create_tables, course_id, error):
+    response = client.put(f"students/1/courses/{course_id}")
+    assert response.data == error
+
+
+@pytest.mark.parametrize('course_id, error', course_id_error_params)
+def test_delete_course_id_validation(db_setup, client, db_create_tables, course_id, error):
+    response = client.delete(f"students/1/courses/{course_id}")
+    assert response.data == error
+
+
+def test_no_course_for_student_validation(db_setup, client, db_create_tables):
+    response = client.delete(f"students/1/courses/1")
+    assert response.data == b'{"message": "This course is not assigned to student"}\n'
+
+
+def test_course_exists_for_student_validation(db_setup, client, db_create_tables):
+    response = client.put(f"students/1/courses/2")
+    assert response.data == b'{"message": "This course is already assigned to student"}\n'

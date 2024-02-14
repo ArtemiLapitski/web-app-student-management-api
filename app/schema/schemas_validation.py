@@ -1,5 +1,4 @@
-from app.database.validation import (get_list_of_courses, get_list_of_groups, check_student_id, check_course_id,
-                                     check_course_for_student)
+from app.database.validation import get_list_of_courses, get_list_of_groups
 
 
 def student_count_validation(cls, v):
@@ -44,33 +43,34 @@ def group_validation(cls, v):
         return v
 
 
-def student_id_validation(cls, v):
-    is_student = check_student_id(v)
-    if not is_student:
-        raise ValueError(f"Student with '{v}' id does not exist")
-    else:
-        return v
+# def student_id_validation(cls, v):
+#     is_student = check_student_id(v)
+#     if not is_student:
+#         raise ValueError(f"Student with '{v}' id does not exist")
+#     else:
+#         return v
+#
+#
+# def course_id_validation(cls, v):
+#     is_course = check_course_id(v)
+#     if not is_course:
+#         raise ValueError(f"Course with '{v}' id does not exist")
+#         # abort(400, f"Course with '{v}' id does not exist")
+#     else:
+#         return v
 
 
-def course_id_validation(cls, v):
-    is_course = check_course_id(v)
-    if not is_course:
-        raise ValueError(f"Course with '{v}' id does not exist")
-    else:
-        return v
-
-
-def no_course_for_student_validation(cls, v, values):
-    student_id = v
-    course_id = values['course_id']
-    is_course_for_student = check_course_for_student(student_id, course_id)
-    if is_course_for_student:
-        raise ValueError(f"This course is already assigned to student")
-
-
-def course_exists_for_student_validation(cls, v, values):
-    student_id = v
-    course_id = values['course_id']
-    is_course_for_student = check_course_for_student(student_id, course_id)
-    if not is_course_for_student:
-        raise ValueError(f"This course is not assigned to student")
+# def no_course_for_student_validation(cls, v, values):
+#     student_id = v
+#     course_id = values['course_id']
+#     is_course_for_student = check_course_for_student(student_id, course_id)
+#     if is_course_for_student:
+#         raise ValueError(f"This course is already assigned to student")
+#
+#
+# def course_exists_for_student_validation(cls, v, values):
+#     student_id = v
+#     course_id = values['course_id']
+#     is_course_for_student = check_course_for_student(student_id, course_id)
+#     if not is_course_for_student:
+#         raise ValueError(f"This course is not assigned to student")

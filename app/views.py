@@ -2,7 +2,7 @@ from flask_restful import Resource
 from flask import abort
 from app.database.crud import (add_student, get_groups_lte_student_count, get_students_for_course, delete_student,
                                get_student, add_course_to_student, delete_student_from_course)
-from app.database.validation import check_student_id
+from app.database.validation import check_student_id, check_course_id, check_course_for_student
 from flask import request
 # from app.schema.schemas import StudentCountToValidate
 from app.schema.schemas import (StudentCountToValidate, CourseNameToValidate, StudentToCreate, StudentIdToValidate,
@@ -46,13 +46,13 @@ class Students(Resource):
             delete_student(student_id)
             return {'mssg': f"Student with id '{student_id}' has been deleted"}
         else:
-            abort(400, f"Student under id '{student_id}' does not exist.")
-
-
-
-
-        # delete_student(student_id)
-        # return {'mssg': f"Student with {student_id} id has been deleted"}
+            abort(400, f"Student under id '{student_id}' does not exist")
+    # @validate()
+    # def delete(self, student_id: StudentIdToValidate):
+    #
+    #     # student_id = StudentIdToValidate(student_id=student_id)
+    #     delete_student(student_id)
+    #     return {'mssg': f"Student with {student_id} id has been deleted"}
 
     # def delete(self, student_id):
     #
@@ -62,14 +62,51 @@ class Students(Resource):
 
 
 class StudentsCourses(Resource):
+    @validate()
+    def put(self, student_id: int, course_id: int):
 
-    def put(self, student_id, course_id):
-        data = CourseToAdd(student_id=student_id, course_id=course_id)
-        add_course_to_student(student_id=data.student_id, course_id=data.course_id)
-        get_student(student_id)
+        is_student = check_student_id(student_id)
+        if not is_student:
+            abort(400, f"Student under id '{student_id}' does not exist")
+
+        is_course = check_course_id(course_id)
+        if not is_course:
+            abort(400, f"Course under id '{course_id}' does not exist")
+
+        is_course_for_student = check_course_for_student(student_id, course_id)
+        if is_course_for_student:
+            abort(400, "This course is already assigned to student")
+
+        add_course_to_student(student_id=student_id, course_id=course_id)
         return get_student(student_id)
 
-    def delete(self, student_id, course_id):
-        data = CourseToDelete(student_id=student_id, course_id=course_id)
-        delete_student_from_course(student_id=data.student_id, course_id=data.course_id)
+
+    # def put(self, student_id, course_id):
+    #     data = CourseToAdd(student_id=student_id, course_id=course_id)
+    #     add_course_to_student(student_id=data.student_id, course_id=data.course_id)
+    #     get_student(student_id)
+    #     return get_student(student_id)
+
+    @validate()
+    def delete(self, student_id: int, course_id: int):
+
+        is_student = check_student_id(student_id)
+        if not is_student:
+            abort(400, f"Student under id '{student_id}' does not exist")
+
+        is_course = check_course_id(course_id)
+        if not is_course:
+            abort(400, f"Course under id '{course_id}' does not exist")
+
+        is_course_for_student = check_course_for_student(student_id, course_id)
+        if not is_course_for_student:
+            abort(400, "This course is not assigned to student")
+
+        delete_student_from_course(student_id=student_id, course_id=course_id)
         return {'mssg': f"Course with {course_id} id has been deleted"}
+
+
+    # def delete(self, student_id, course_id):
+    #     data = CourseToDelete(student_id=student_id, course_id=course_id)
+    #     delete_student_from_course(student_id=data.student_id, course_id=data.course_id)
+    #     return {'mssg': f"Course with {course_id} id has been deleted"}
