@@ -3,7 +3,7 @@ from sqlalchemy.orm import sessionmaker
 from app.database.models import StudentModel, GroupModel, CourseModel, CourseStudentModel
 from sqlalchemy.engine.base import Engine
 from sqlalchemy.orm import Session
-from config import DB_URL, CREATE_TABLES_SQL_FILE_PATH
+from config import CREATE_TABLES_SQL_FILE_PATH
 
 
 def create_db_and_user(
@@ -43,15 +43,6 @@ def create_db_and_user(
     with engine.connect() as conn:
         conn.execute(text(f"GRANT ALL ON SCHEMA public TO {role}"))
         conn.commit()
-
-
-def create_tables(engine: Engine, sql_file_path: str):
-
-    with engine.connect() as conn:
-        with open(sql_file_path) as file:
-            query = text(file.read())
-            conn.execute(query)
-            conn.commit()
 
 
 def get_session(engine: Engine) -> Session:
@@ -102,9 +93,12 @@ def add_data(session: Session, groups: list, courses: list, data_by_student: dic
 
 
 def create_tables_with_data(engine: Engine, session: Session, groups: list, courses: list, data_by_student: dict):
-    # engine = create_engine(DB_URL)
-    create_tables(engine, CREATE_TABLES_SQL_FILE_PATH)
-    # session = get_session(engine)
+    with engine.connect() as conn:
+        with open(CREATE_TABLES_SQL_FILE_PATH) as file:
+            query = text(file.read())
+            conn.execute(query)
+            conn.commit()
+
     with session:
         add_data(session, groups=groups, courses=courses, data_by_student=data_by_student)
 

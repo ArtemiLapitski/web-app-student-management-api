@@ -1,6 +1,5 @@
-from app.database.setup import (create_db_and_user, create_tables, add_data, get_session)
+from app.database.setup import (create_db_and_user, create_tables_with_data, get_session)
 from os import environ
-from config import CREATE_TABLES_SQL_FILE_PATH
 from app.generate_data import generate_test_data
 from sqlalchemy import create_engine
 
@@ -28,13 +27,18 @@ if __name__ == "__main__":
                        port=DB_PORT,
                        host=DB_HOST)
 
+
+
+    # create_tables(engine, CREATE_TABLES_SQL_FILE_PATH)
+
+    generated_data = generate_test_data()
+
     engine = create_engine(DB_URL)
-
-    create_tables(engine, CREATE_TABLES_SQL_FILE_PATH)
-
-    generated_test_data = generate_test_data()
-
     session = get_session(engine)
 
-    with session:
-        add_data(session, **generated_test_data)
+    create_tables_with_data(engine, session, **generated_data)
+
+
+
+    # with session:
+    #     add_data(session, **generated_test_data)

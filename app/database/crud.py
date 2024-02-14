@@ -24,34 +24,6 @@ def add_student(first_name: str, last_name: str, courses: list, group: str) -> i
     return student_id
 
 
-# def get_student(student_id: int) -> dict:
-#     group = (db.session.query(GroupModel.group_name)
-#              .filter(StudentModel.student_id == student_id)
-#              .filter(StudentModel.group_id == GroupModel.group_id)
-#              .first())
-#     if group:
-#         group = group[0]
-#
-#     first_and_last_name = (db.session.query(StudentModel.first_name, StudentModel.last_name)
-#                            .filter(StudentModel.student_id == student_id)
-#                            .first())
-#
-#     courses = (db.session.query(CourseModel.course_name)
-#                .filter(CourseStudentModel.course_id == CourseModel.course_id)
-#                .filter(CourseStudentModel.student_id == student_id)
-#                .all())
-#
-#     courses = [course[0] for course in courses]
-#
-#     return {
-#                 'student_id': student_id,
-#                 'first_name': first_and_last_name[0],
-#                 'last_name': first_and_last_name[1],
-#                 'group': group,
-#                 'courses': courses
-#             }
-
-
 def get_student(student_id: int) -> dict:
     is_group = db.session.query(StudentModel.query.filter(StudentModel.student_id == student_id)
                                 .filter(StudentModel.group_id != None).exists()).scalar()
