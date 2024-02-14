@@ -28,13 +28,13 @@ def test_assign_students_to_groups(execution_number):
     groups = generate_groups()
     students_by_groups = assign_students_to_groups(students, groups)
 
-    amount_of_students_per_group = []
+    amount_of_students = []
     for group, students in students_by_groups.items():
-        amount_of_students_per_group.append(len(students))
+        amount_of_students.append(len(students))
         if group != "no_group":
             assert STUDENTS_PER_GROUP_MIN <= len(students) <= STUDENTS_PER_GROUP_MAX
 
-    assert sum(amount_of_students_per_group) == 200
+    assert sum(amount_of_students) == 200
 
 
 @pytest.mark.parametrize('execution_number', range(100))
@@ -68,7 +68,7 @@ def test_courses_by_students_in_get_data_by_student(execution_number):
 
 
 @pytest.mark.parametrize('execution_number', range(100))
-def test_groups_get_data_by_student(execution_number):
+def test_students_by_group_in_get_data_by_student(execution_number):
     groups = generate_groups()
     students = generate_students()
     courses = get_courses()

@@ -29,11 +29,51 @@ if __name__ == '__main__':
     app.run(debug=True)
 
 
+# app = create_app()
+# init_db(app)
+# api = create_api(app)
+# add_urls(api)
+# #
 # with app.app_context():
-#     from app.schema.schemas import StudentToCreate
-#     # from app.database.validation import get_list_of_courses
+#     from app.database.models import GroupModel, StudentModel, CourseModel, CourseStudentModel
+#     from sqlalchemy import or_, func
+#     from app.schema.schemas import StudentToRetrieve
 #
-#     # print(get_list_of_courses())
+#     # is_group = db.session.query(StudentModel.query.filter(StudentModel.student_id == 1)
+#     #                             .filter(StudentModel.group_id != None).exists()).scalar()
+#     #
+#     # print(is_group)
 #
-#     StudentToCreate(first_name='Ge', last_name='Me', courses=['Music', 'PE'])
+#     def get_student(student_id: int) -> dict:
+#         is_group = db.session.query(StudentModel.query.filter(StudentModel.student_id == student_id)
+#                                     .filter(StudentModel.group_id != None).exists()).scalar()
+#
+#         if is_group:
+#             student = db.session.query(StudentModel.first_name, StudentModel.last_name, GroupModel.group_name,
+#                                        func.array_agg(CourseModel.course_name)) \
+#                 .filter(CourseStudentModel.course_id == CourseModel.course_id) \
+#                 .filter(GroupModel.group_id == StudentModel.group_id) \
+#                 .filter(StudentModel.student_id == student_id) \
+#                 .filter(CourseStudentModel.student_id == StudentModel.student_id) \
+#                 .group_by(StudentModel.first_name, StudentModel.last_name, GroupModel.group_name).first()
+#         else:
+#             student = db.session.query(StudentModel.first_name, StudentModel.last_name, None,
+#                                         func.array_agg(CourseModel.course_name))\
+#                 .filter(CourseStudentModel.course_id == CourseModel.course_id)\
+#                 .filter(StudentModel.student_id == student_id)\
+#                 .filter(CourseStudentModel.student_id == StudentModel.student_id)\
+#                 .group_by(StudentModel.first_name, StudentModel.last_name).first()
+#
+#         return {
+#             'student_id': student_id,
+#             'first_name': student[0],
+#             'last_name': student[1],
+#             'group': student[2],
+#             'courses': student[3]
+#         }
+#
+#
+#     # print(get_student(5))
+#
+#     # print(StudentToRetrieve(**get_student(5)).dict())
 

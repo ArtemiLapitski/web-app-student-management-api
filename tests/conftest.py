@@ -10,11 +10,8 @@ from config import (DB_USERNAME, DB_PASSWORD, DB_ROLE, DB_NAME, DB_HOST, DB_SUPE
 from app.database.db import db
 
 
-
-
-
 @pytest.fixture(scope="session")
-def db_setup(request):
+def db_setup():
     create_db_and_user(superuser_username=DB_SUPERUSER_USERNAME,
                        superuser_password=DB_SUPERUSER_PASSWORD,
                        username=DB_USERNAME,
@@ -24,7 +21,6 @@ def db_setup(request):
                        port=DB_PORT,
                        host=DB_HOST)
 
-    # def teardown():
     yield
     superuser_url = URL.create(
         "postgresql",
@@ -40,8 +36,6 @@ def db_setup(request):
         conn.execute(text(f"DROP USER {DB_USERNAME}"))
         conn.execute(text(f"DROP ROLE {DB_ROLE}"))
 
-    # request.addfinalizer(teardown)
-
 
 @pytest.fixture(scope="session")
 def client():
@@ -52,20 +46,6 @@ def client():
 
     client = app.test_client()
 
-    # ctx = app.app_context()
-    # ctx.push()
-    #
-    # yield client
-    #
-    # ctx.pop()
-
-    # def teardown():
-    #     ctx.pop()
-    #
-    # request.addfinalizer(teardown)
-    # return client
-    #
-    #
     return client
 
 
@@ -81,8 +61,6 @@ def db_session(db_engine):
 
 @pytest.fixture(scope="function")
 def db_create_tables(db_engine, db_session):
-    # engine = create_engine(DB_URL)
-    # session = get_session(engine)
     create_tables_with_data(session=db_session, engine=db_engine, groups=groups_mock, courses=courses_mock,
                             data_by_student=data_by_student_mock)
     yield

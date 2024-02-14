@@ -24,32 +24,61 @@ def add_student(first_name: str, last_name: str, courses: list, group: str) -> i
     return student_id
 
 
+# def get_student(student_id: int) -> dict:
+#     group = (db.session.query(GroupModel.group_name)
+#              .filter(StudentModel.student_id == student_id)
+#              .filter(StudentModel.group_id == GroupModel.group_id)
+#              .first())
+#     if group:
+#         group = group[0]
+#
+#     first_and_last_name = (db.session.query(StudentModel.first_name, StudentModel.last_name)
+#                            .filter(StudentModel.student_id == student_id)
+#                            .first())
+#
+#     courses = (db.session.query(CourseModel.course_name)
+#                .filter(CourseStudentModel.course_id == CourseModel.course_id)
+#                .filter(CourseStudentModel.student_id == student_id)
+#                .all())
+#
+#     courses = [course[0] for course in courses]
+#
+#     return {
+#                 'student_id': student_id,
+#                 'first_name': first_and_last_name[0],
+#                 'last_name': first_and_last_name[1],
+#                 'group': group,
+#                 'courses': courses
+#             }
+
+
 def get_student(student_id: int) -> dict:
-    group = (db.session.query(GroupModel.group_name)
-             .filter(StudentModel.student_id == student_id)
-             .filter(StudentModel.group_id == GroupModel.group_id)
-             .first())
-    if group:
-        group = group[0]
+    is_group = db.session.query(StudentModel.query.filter(StudentModel.student_id == student_id)
+                                .filter(StudentModel.group_id != None).exists()).scalar()
 
-    first_and_last_name = (db.session.query(StudentModel.first_name, StudentModel.last_name)
-                           .filter(StudentModel.student_id == student_id)
-                           .first())
-
-    courses = (db.session.query(CourseModel.course_name)
-               .filter(CourseStudentModel.course_id == CourseModel.course_id)
-               .filter(CourseStudentModel.student_id == student_id)
-               .all())
-
-    courses = [course[0] for course in courses]
+    if is_group:
+        student = db.session.query(StudentModel.first_name, StudentModel.last_name, GroupModel.group_name,
+                                   func.array_agg(CourseModel.course_name)) \
+            .filter(CourseStudentModel.course_id == CourseModel.course_id) \
+            .filter(GroupModel.group_id == StudentModel.group_id) \
+            .filter(StudentModel.student_id == student_id) \
+            .filter(CourseStudentModel.student_id == StudentModel.student_id) \
+            .group_by(StudentModel.first_name, StudentModel.last_name, GroupModel.group_name).first()
+    else:
+        student = db.session.query(StudentModel.first_name, StudentModel.last_name, None,
+                                   func.array_agg(CourseModel.course_name)) \
+            .filter(CourseStudentModel.course_id == CourseModel.course_id) \
+            .filter(StudentModel.student_id == student_id) \
+            .filter(CourseStudentModel.student_id == StudentModel.student_id) \
+            .group_by(StudentModel.first_name, StudentModel.last_name).first()
 
     return {
-                'student_id': student_id,
-                'first_name': first_and_last_name[0],
-                'last_name': first_and_last_name[1],
-                'group': group,
-                'courses': courses
-            }
+        'student_id': student_id,
+        'first_name': student[0],
+        'last_name': student[1],
+        'group': student[2],
+        'courses': student[3]
+    }
 
 
 def get_groups_lte_student_count(students_count: int) -> list:

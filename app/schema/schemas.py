@@ -28,4 +28,9 @@ class StudentToCreate(BaseModel):
     validate_group = validator('group')(group_validation)
 
 
-
+class StudentToRetrieve(BaseModel):
+    student_id: int
+    first_name: str
+    last_name: str
+    courses: list
+    group: Optional[str] = None
