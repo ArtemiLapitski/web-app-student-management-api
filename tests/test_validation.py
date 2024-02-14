@@ -1,7 +1,7 @@
 import pytest
 
 
-params = [
+student_count_lte_error_params = [
     (
         None,
         b'{"validation_error":{"query_params":[{"loc":["student_count_lte"],"msg":"fie'
@@ -13,14 +13,14 @@ params = [
         b'ue is not a valid integer","type":"type_error.integer"}]}}\n'
     ),
     (
-        '-15',
+        -15,
         b'{"validation_error":{"query_params":[{"loc":["student_count_lte"],"msg":"Amo'
         b'unt of students cannot be negative","type":"value_error"}]}}\n'
     )
 ]
 
 
-@pytest.mark.parametrize('student_count_lte, error', params)
+@pytest.mark.parametrize('student_count_lte, error', student_count_lte_error_params)
 def test_student_count_validation(db_setup, client, db_create_tables, student_count_lte, error):
     response = client.get('groups', query_string={'student_count_lte': student_count_lte})
     assert response.data == error

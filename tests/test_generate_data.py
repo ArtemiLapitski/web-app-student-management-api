@@ -108,8 +108,3 @@ def test_generate_test_data(mocker):
     assert generated_data['groups'] == groups_mock
     assert generated_data['courses'] == courses_mock
     assert generated_data['data_by_student'] == data_by_student_mock
-
-
-
-
-

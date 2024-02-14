@@ -27,18 +27,9 @@ if __name__ == "__main__":
                        port=DB_PORT,
                        host=DB_HOST)
 
-
-
-    # create_tables(engine, CREATE_TABLES_SQL_FILE_PATH)
-
     generated_data = generate_test_data()
 
     engine = create_engine(DB_URL)
     session = get_session(engine)
 
     create_tables_with_data(engine, session, **generated_data)
-
-
-
-    # with session:
-    #     add_data(session, **generated_test_data)

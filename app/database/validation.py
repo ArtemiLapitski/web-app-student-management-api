@@ -1,5 +1,6 @@
 from sqlalchemy import select
-from app.database.models import StudentModel, GroupModel, CourseModel, CourseStudentModel, db
+from app.database.models import StudentModel, GroupModel, CourseModel, CourseStudentModel
+from app.database.db import db
 
 
 def get_list_of_courses() -> list:
@@ -13,7 +14,7 @@ def get_list_of_groups() -> list:
 
     return [group[0] for group in all_groups]
 
-# from app.exceptions import StudentIdNotFound
+
 def check_student_id(student_id: int):
     is_student = bool(db.session.execute(
         select(StudentModel.student_id).where(StudentModel.student_id == student_id)

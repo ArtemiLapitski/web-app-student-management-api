@@ -27,7 +27,6 @@ class Students(Resource):
 
     @validate()
     def delete(self, student_id: int):
-
         is_student = check_student_id(student_id)
         if is_student:
             delete_student(student_id)
@@ -39,7 +38,6 @@ class Students(Resource):
 class StudentsCourses(Resource):
     @validate()
     def put(self, student_id: int, course_id: int):
-
         is_student = check_student_id(student_id)
         if not is_student:
             abort(400, f"Student under id '{student_id}' does not exist")
@@ -57,7 +55,6 @@ class StudentsCourses(Resource):
 
     @validate()
     def delete(self, student_id: int, course_id: int):
-
         is_student = check_student_id(student_id)
         if not is_student:
             abort(400, f"Student under id '{student_id}' does not exist")
@@ -72,4 +69,3 @@ class StudentsCourses(Resource):
 
         delete_student_from_course(student_id=student_id, course_id=course_id)
         return {'mssg': f"Course under id '{course_id}' has been deleted"}
-
