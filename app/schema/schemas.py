@@ -1,7 +1,7 @@
-from pydantic import BaseModel, validator
-from .schemas_validation import (student_count_validation, course_name_validation, name_validation,
-                                 courses_list_validation, group_validation)
 from typing import Optional
+from pydantic import BaseModel, validator
+from app.schema.schemas_validation import (student_count_validation, course_name_validation, name_validation,
+                                 courses_list_validation, group_validation)
 
 
 class StudentCountToValidate(BaseModel):

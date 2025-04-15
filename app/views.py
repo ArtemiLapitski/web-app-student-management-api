@@ -1,10 +1,10 @@
 from flask_restful import Resource
 from flask import abort
+from flask_pydantic import validate
 from app.database.crud import (add_student, get_groups_lte_student_count, get_students_for_course, delete_student,
                                get_student, add_course_to_student, delete_student_from_course)
 from app.database.validation import check_student_id, check_course_id, check_course_for_student
 from app.schema.schemas import StudentCountToValidate, CourseNameToValidate, StudentToCreate, StudentToRetrieve
-from flask_pydantic import validate
 
 
 class Groups(Resource):

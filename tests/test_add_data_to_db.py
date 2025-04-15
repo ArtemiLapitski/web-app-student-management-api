@@ -5,38 +5,29 @@ from tests.mocks import groups_mock, courses_mock, students_mock, students_by_gr
 
 
 def test_students(db_setup, db_create_tables, db_session):
-
     with db_session:
         students_from_db = db_session.execute(select(StudentModel.student_id, StudentModel.first_name,
                                           StudentModel.last_name)).all()
-
     assert students_from_db == students_mock
     assert len(students_from_db) == 200
 
 
 def test_groups(db_setup, db_create_tables, db_session):
-
     with db_session:
         groups_from_db = db_session.execute(select(GroupModel.group_name)).all()
-
     groups_from_db_list = [group[0] for group in groups_from_db]
-
     assert groups_from_db_list == groups_mock
     assert len(groups_from_db) == 10
 
 
 def test_courses(db_setup, db_create_tables, db_session):
-
     with db_session:
         courses = db_session.execute(select(CourseModel.course_name)).all()
-
     courses = [course_name[0] for course_name in courses]
-
     assert courses == courses_mock
 
 
 def test_students_by_groups(db_setup, db_create_tables, db_session):
-
     with db_session:
         for group, students in students_by_group_mock.items():
             students_name_only = [' '.join(student[1:]) for student in students]
@@ -63,7 +54,6 @@ def test_students_by_groups(db_setup, db_create_tables, db_session):
 
 
 def test_courses_by_students(db_setup, db_create_tables, db_session):
-
     with db_session:
         courses_by_students_from_bd = db_session.execute(
             select(

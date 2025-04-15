@@ -1,13 +1,12 @@
 import pytest
-from main import create_app, create_api
-from app.urls import add_urls
-from tests.mocks import groups_mock, courses_mock, data_by_student_mock
-from config import DB_URL
 from sqlalchemy import create_engine, URL, text
+from main import create_app, create_api
+from tests.mocks import groups_mock, courses_mock, data_by_student_mock
+from app.urls import add_urls
 from app.database.setup import create_db_and_user, get_session, create_tables_with_data, drop_tables
-from config import (DB_USERNAME, DB_PASSWORD, DB_ROLE, DB_NAME, DB_HOST, DB_SUPERUSER_PASSWORD,
-                    DB_SUPERUSER_USERNAME, DB_PORT)
 from app.database.db import db
+from config import (DB_USERNAME, DB_PASSWORD, DB_ROLE, DB_NAME, DB_HOST, DB_SUPERUSER_PASSWORD,
+                    DB_SUPERUSER_USERNAME, DB_PORT, DB_URL)
 
 
 @pytest.fixture(scope="session")
@@ -43,10 +42,7 @@ def client():
     db.init_app(app)
     api = create_api(app)
     add_urls(api)
-
-    client = app.test_client()
-
-    return client
+    return app.test_client()
 
 
 @pytest.fixture(scope="session")

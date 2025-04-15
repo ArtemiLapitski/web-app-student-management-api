@@ -1,7 +1,7 @@
-from app.database.setup import (create_db_and_user, create_tables_with_data, get_session)
 from os import environ
-from app.generate_data import generate_test_data
 from sqlalchemy import create_engine
+from app.database.setup import (create_db_and_user, create_tables_with_data, get_session)
+from app.generate_data import generate_test_data
 
 
 DB_SUPERUSER_USERNAME = environ['DB_SUPERUSER_USERNAME']

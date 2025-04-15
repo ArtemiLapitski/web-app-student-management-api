@@ -15,12 +15,10 @@ def add_student(first_name: str, last_name: str, courses: list, group: str) -> i
     student_id = student.student_id
 
     for course_name in courses:
-
         course_id = db.session.query(CourseModel).filter_by(course_name=course_name).first().course_id
         db.session.add(CourseStudentModel(course_id=course_id, student_id=student_id))
 
     db.session.commit()
-
     return student_id
 
 
@@ -58,7 +56,6 @@ def get_groups_lte_student_count(students_count: int) -> list:
               .join(StudentModel)
               .having(func.count(StudentModel.student_id) <= students_count)
               .group_by(GroupModel.group_name).all())
-
     return [group[0] for group in groups]
 
 
@@ -68,22 +65,21 @@ def get_students_for_course(course_name: str) -> list:
                            .join(CourseModel, CourseStudentModel.course_id == CourseModel.course_id)
                            .where(CourseModel.course_name == course_name)
                            .all())
-
     return [f"{first_name} {last_name}" for first_name, last_name in students_for_course]
 
 
-def delete_student(student_id: int):
+def delete_student(student_id: int) -> None:
     student = db.session.query(StudentModel).filter_by(student_id=student_id).first()
     db.session.delete(student)
     db.session.commit()
 
 
-def add_course_to_student(student_id: int, course_id: int):
+def add_course_to_student(student_id: int, course_id: int) -> None:
     db.session.add(CourseStudentModel(course_id=course_id, student_id=student_id))
     db.session.commit()
 
 
-def delete_student_from_course(student_id: int, course_id: int):
+def delete_student_from_course(student_id: int, course_id: int) -> None:
     instance = (db.session.query(CourseStudentModel)
                 .where(CourseStudentModel.student_id == student_id)
                 .where(CourseStudentModel.course_id == course_id)

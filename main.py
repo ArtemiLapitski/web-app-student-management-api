@@ -1,8 +1,8 @@
 from flask import Flask
 from flask_restful import Api
 from app.urls import add_urls
-from config import SECRET_KEY, DB_URL
 from app.database.db import db
+from config import SECRET_KEY, DB_URL
 
 
 def create_app():

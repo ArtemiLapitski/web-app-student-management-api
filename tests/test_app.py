@@ -30,7 +30,6 @@ def test_add_student(db_setup, client, db_create_tables):
 
 
 def test_delete_student(db_setup, client, db_create_tables):
-
     students_for_course = client.get('students', query_string={'course': 'Physics'})
     students_for_course = json.loads(students_for_course.data)
     assert "Chace Blackwell" in students_for_course

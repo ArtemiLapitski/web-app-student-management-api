@@ -1,8 +1,8 @@
 from sqlalchemy import URL, text, create_engine
 from sqlalchemy.orm import sessionmaker
-from app.database.models import StudentModel, GroupModel, CourseModel, CourseStudentModel
 from sqlalchemy.engine.base import Engine
 from sqlalchemy.orm import Session
+from app.database.models import StudentModel, GroupModel, CourseModel, CourseStudentModel
 from config import CREATE_TABLES_SQL_FILE_PATH
 
 
@@ -14,7 +14,7 @@ def create_db_and_user(
         db_name: str,
         role: str,
         port: int,
-        host: str):
+        host: str) -> None:
 
     superuser_url = URL.create(
         "postgresql",
@@ -51,21 +51,21 @@ def get_session(engine: Engine) -> Session:
     return session
 
 
-def add_courses(session: Session, courses: list):
+def add_courses(session: Session, courses: list) -> None:
     with session:
         for course in courses:
             session.add(CourseModel(course_name=course))
         session.commit()
 
 
-def add_groups(session: Session, groups: list):
+def add_groups(session: Session, groups: list) -> None:
     with session:
         for group in groups:
             session.add(GroupModel(group_name=group))
         session.commit()
 
 
-def add_students(session: Session, data_by_student: dict):
+def add_students(session: Session, data_by_student: dict) -> None:
     with session:
         for student_name, data in data_by_student.items():
 
@@ -86,13 +86,13 @@ def add_students(session: Session, data_by_student: dict):
         session.commit()
 
 
-def add_data(session: Session, groups: list, courses: list, data_by_student: dict):
+def add_data(session: Session, groups: list, courses: list, data_by_student: dict) -> None:
     add_courses(session, courses)
     add_groups(session, groups)
     add_students(session, data_by_student)
 
 
-def create_tables_with_data(engine: Engine, session: Session, groups: list, courses: list, data_by_student: dict):
+def create_tables_with_data(engine: Engine, session: Session, groups: list, courses: list, data_by_student: dict) -> None:
     with engine.connect() as conn:
         with open(CREATE_TABLES_SQL_FILE_PATH) as file:
             query = text(file.read())
